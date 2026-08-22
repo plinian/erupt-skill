@@ -11,7 +11,7 @@ window.eruptSiteConfig = {
     // 登录页 Logo
     loginLogoPath: null,
     // 是否显示版权信息
-    copyright: false,
+    copyright: true,
     // 主题色
     theme: {
         primaryColor: "#3f51b5"

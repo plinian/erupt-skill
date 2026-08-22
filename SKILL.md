@@ -38,13 +38,17 @@ bash <skill目录>/scripts/setup-env.sh
 1. 项目名用英文 kebab-case（如 `library-admin`），在用户当前目录下创建
 2. 复制本 skill 的 `template/` 目录到项目目录
 3. 将 `pom.xml` 和 `src/main/resources/application.yml` 中的 `__ARTIFACT_ID__` 全部替换为项目名
-4. **erupt 版本追最新**：查询 Maven 仓库最新 release 并更新 pom.xml 的 `<erupt.version>`：
+4. **erupt 版本追最新**：查询 Maven 仓库版本列表，取语义化排序最大的正式版，更新 pom.xml 的 `<erupt.version>`：
 
    ```bash
-   curl -s --max-time 10 "https://maven.aliyun.com/repository/public/xyz/erupt/erupt-spring-boot-starter/maven-metadata.xml" | sed -n "s/.*<release>\(.*\)<\/release>.*/\1/p"
+   curl -s --max-time 10 "https://maven.aliyun.com/repository/public/xyz/erupt/erupt-spring-boot-starter/maven-metadata.xml" \
+     | grep -oE "<version>[0-9]+\.[0-9]+\.[0-9]+</version>" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | sort -V | tail -1
    ```
 
-   阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；两者都失败则保留模板默认版本，不要阻塞生成流程
+   注意：
+   - **版本号必须来自上述命令的实际输出，严禁凭记忆或训练数据填写**（曾出现过误写 1.13.0 旧版本的情况）
+   - artifact 固定为 `erupt-spring-boot-starter`，不要查 `erupt`、`erupt-core` 等其他 artifact
+   - 阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；查询结果低于模板默认版本或两源都失败时，保留模板默认版本，不要阻塞生成流程
 5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
 6. 在 `src/main/java/app/model/` 下编写实体类
 
