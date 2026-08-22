@@ -30,6 +30,7 @@ bash <skill目录>/scripts/setup-env.sh
 - 识别核心实体（通常 2~5 个），如"图书管理" → 图书、分类、借阅记录
 - 为每个实体设计 5~10 个常识字段（名称、状态、时间、金额等）
 - 识别实体间关系（分类→树形、明细→一对多、标签→多对多）
+- 全局只有一条记录的实体（系统设置、参数配置等）→ FORM 表单视图，见 annotations.md「单行数据表单管理」
 - 实体与字段命名用英文，界面标题（title）用用户使用的语言
 
 ### 第 2 步：生成项目
@@ -37,8 +38,15 @@ bash <skill目录>/scripts/setup-env.sh
 1. 项目名用英文 kebab-case（如 `library-admin`），在用户当前目录下创建
 2. 复制本 skill 的 `template/` 目录到项目目录
 3. 将 `pom.xml` 和 `src/main/resources/application.yml` 中的 `__ARTIFACT_ID__` 全部替换为项目名
-4. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
-5. 在 `src/main/java/app/model/` 下编写实体类
+4. **erupt 版本追最新**：查询 Maven 仓库最新 release 并更新 pom.xml 的 `<erupt.version>`：
+
+   ```bash
+   curl -s --max-time 10 "https://maven.aliyun.com/repository/public/xyz/erupt/erupt-spring-boot-starter/maven-metadata.xml" | sed -n "s/.*<release>\(.*\)<\/release>.*/\1/p"
+   ```
+
+   阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；两者都失败则保留模板默认版本，不要阻塞生成流程
+5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
+6. 在 `src/main/java/app/model/` 下编写实体类
 
 **实体类必须严格遵循 [reference/annotations.md](reference/annotations.md) 的规范**，这是本 skill 的核心，编写前必读。需要完整注解字典（所有属性、枚举值、子注解定义）时读 [reference/erupt-model.md](reference/erupt-model.md)。
 

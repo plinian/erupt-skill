@@ -1,6 +1,6 @@
 # Erupt 实体生成规范（速查）
 
-生成实体类时严格遵循本文档。erupt 版本 2.0.4，JPA 用 `jakarta.persistence.*`。
+生成实体类时严格遵循本文档。本文档基于 erupt 2.0.4 编写并验证（实际生成时版本追 Maven 最新 release，用法向后兼容；若新版编译报错以错误信息为准并查官方文档），JPA 用 `jakarta.persistence.*`。
 完整注解字典（@Erupt/@EruptField 所有属性与枚举）见 [erupt-model.md](erupt-model.md)，本文档只覆盖生成时的决策规则与项目约定。
 
 ## 实体类骨架（标准模板）
@@ -156,6 +156,83 @@ public class Category extends BaseModel {
 }
 ```
 需要 import `xyz.erupt.annotation.sub_erupt.Tree`。
+
+## 单行数据表单管理（FORM 视图，适合系统设置/参数配置）
+
+只有一条记录的实体（如系统设置、站点配置、全局参数）不要用列表页，用 **FORM 菜单类型**：页面直接渲染成一张表单，打开即编辑、保存即生效。
+
+FORM 视图**不自动读写数据库**，加载与保存全部由 DataProxy 钩子完成：
+
+```java
+// 1. 实体：正常写 @EruptField，并挂上 dataProxy
+@Erupt(name = "系统设置", dataProxy = SiteConfigProxy.class)
+@Table(name = "t_site_config")
+@Entity
+@Getter
+@Setter
+public class SiteConfig extends BaseModel {
+
+    @EruptField(edit = @Edit(title = "网站名称", notNull = true))
+    private String siteName;
+
+    @EruptField(edit = @Edit(title = "客服电话"))
+    private String servicePhone;
+}
+```
+
+```java
+// 2. DataProxy：formViewBehavior 加载唯一记录，formSave 新增或更新
+package app.proxy;
+
+import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import xyz.erupt.annotation.fun.DataProxy;
+import xyz.erupt.jpa.dao.EruptDao;
+import app.model.SiteConfig;
+
+@Service
+public class SiteConfigProxy implements DataProxy<SiteConfig> {
+
+    @Resource
+    private EruptDao eruptDao;
+
+    @Override
+    public void formViewBehavior(SiteConfig model) {
+        SiteConfig db = eruptDao.lambdaQuery(SiteConfig.class).one();
+        if (db != null) BeanUtils.copyProperties(db, model);
+    }
+
+    @Override
+    @Transactional
+    public void formSave(SiteConfig model) {
+        SiteConfig db = eruptDao.lambdaQuery(SiteConfig.class).one();
+        if (db == null) {
+            eruptDao.persist(model);
+        } else {
+            model.setId(db.getId());
+            eruptDao.merge(model);
+        }
+    }
+}
+```
+
+```java
+// 3. 菜单注册：FORM 类型 + 手动补 ADD/EDIT 功能权限（必须！）
+MetaMenu formMenu = MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, MenuTypeEnum.FORM);
+menus.add(formMenu);
+// UPMS 只为 TABLE/TREE 菜单自动生成功能权限按钮，FORM 菜单必须手动补，
+// 否则打开/保存表单时报 "Insufficient permissions"
+menus.add(MetaMenu.createSimpleMenu("SiteConfig@ADD", "新增", "SiteConfig@ADD", formMenu, 10, MenuTypeEnum.BUTTON.getCode()));
+menus.add(MetaMenu.createSimpleMenu("SiteConfig@EDIT", "修改", "SiteConfig@EDIT", formMenu, 20, MenuTypeEnum.BUTTON.getCode()));
+```
+
+要点：
+- FORM 视图字段只需写 `edit`，不需要 `views`（没有列表页）
+- **必须手动注册 `实体名@ADD` 和 `实体名@EDIT` 两个 BUTTON 权限菜单**（见上），这是 FORM 类型最常见的坑
+- 数据来源不限于数据库：`formViewBehavior`/`formSave` 里也可以读写文件、调外部 API
+- 保存前会正常执行字段校验（notNull、正则等）；`formSave` 里抛 `xyz.erupt.annotation.exception.EruptException` 可中止保存并向用户提示
 
 ## 菜单注册（必做，否则实体不会出现在后台）
 
