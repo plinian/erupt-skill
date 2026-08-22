@@ -21,7 +21,8 @@ mkdir -p "$RUNTIME_DIR"
 case "$(uname -s)" in
     Darwin) OS="mac" ;;
     Linux)  OS="linux" ;;
-    *) log "不支持的系统: $(uname -s)（Windows 请参考 SKILL.md 手动安装 JDK17 与 Maven）"; exit 1 ;;
+    MINGW*|MSYS*|CYGWIN*) OS="windows" ;;  # Git Bash / MSYS2
+    *) log "不支持的系统: $(uname -s)"; exit 1 ;;
 esac
 case "$(uname -m)" in
     arm64|aarch64) ARCH="aarch64" ;;
@@ -38,6 +39,7 @@ download() { # download <url> <dest>
 JAVA_HOME_RESOLVED=""
 
 java_major() { "$1" -version 2>&1 | head -1 | sed -E 's/.*version "([0-9]+).*/\1/'; }
+jdk_ok() { [ -x "$1/bin/java" ] || [ -x "$1/bin/java.exe" ]; }  # Windows 下可执行文件是 java.exe
 
 if command -v java >/dev/null 2>&1; then
     ver="$(java_major java || echo 0)"
@@ -50,13 +52,13 @@ fi
 if [ -z "$JAVA_HOME_RESOLVED" ] && ! { command -v java >/dev/null 2>&1 && [ "$(java_major java || echo 0)" -ge 17 ] 2>/dev/null; }; then
     bundled_tar="$VENDOR_JDK_DIR/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"
     existing="$(find "$RUNTIME_DIR" -maxdepth 1 -type d -name "jdk-${JDK_MAJOR}*" 2>/dev/null | head -1 || true)"
-    if [ -x "$RUNTIME_DIR/jdk${JDK_MAJOR}-min/bin/java" ]; then
+    if jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min"; then
         JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
         log "使用已缓存内置 JDK: $JAVA_HOME_RESOLVED"
     elif [ -f "$bundled_tar" ]; then
         log "解压 skill 内置 JDK ${JDK_MAJOR}（无需下载）..."
         tar -xzf "$bundled_tar" -C "$RUNTIME_DIR"
-        [ -x "$RUNTIME_DIR/jdk${JDK_MAJOR}-min/bin/java" ] || { log "内置 JDK 解压失败"; exit 1; }
+        jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min" || { log "内置 JDK 解压失败"; exit 1; }
         JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
         log "内置 JDK 就绪: $JAVA_HOME_RESOLVED"
     elif [ -n "$existing" ]; then
@@ -64,18 +66,23 @@ if [ -z "$JAVA_HOME_RESOLVED" ] && ! { command -v java >/dev/null 2>&1 && [ "$(j
         [ "$OS" = "mac" ] && JAVA_HOME_RESOLVED="$existing/Contents/Home"
         log "使用已缓存 JDK: $JAVA_HOME_RESOLVED"
     else
-        tarball="$RUNTIME_DIR/jdk.tar.gz"
+        pkg_ext="tar.gz"; [ "$OS" = "windows" ] && pkg_ext="zip"
+        tarball="$RUNTIME_DIR/jdk.$pkg_ext"
         # 主源: Adoptium 官方 API；备源: 清华镜像（国内加速）
         primary="https://api.adoptium.net/v3/binary/latest/${JDK_MAJOR}/ga/${OS}/${ARCH}/jdk/hotspot/normal/eclipse"
         if ! download "$primary" "$tarball"; then
             log "官方源失败，切换清华镜像..."
             listing="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/${JDK_MAJOR}/jdk/${ARCH}/${OS}/"
-            file="$(curl -fsSL "$listing" | grep -oE "OpenJDK${JDK_MAJOR}U-jdk_[^\"]*\.tar\.gz" | sort -u | tail -1)"
+            file="$(curl -fsSL "$listing" | grep -oE "OpenJDK${JDK_MAJOR}U-jdk_[^\"]*\.${pkg_ext}" | sort -u | tail -1)"
             [ -n "$file" ] || { log "无法从镜像获取 JDK 文件名"; exit 1; }
             download "${listing}${file}" "$tarball"
         fi
         log "解压 JDK..."
-        tar -xzf "$tarball" -C "$RUNTIME_DIR"
+        if [ "$pkg_ext" = "zip" ]; then
+            unzip -q "$tarball" -d "$RUNTIME_DIR" 2>/dev/null || tar -xf "$tarball" -C "$RUNTIME_DIR"
+        else
+            tar -xzf "$tarball" -C "$RUNTIME_DIR"
+        fi
         rm -f "$tarball"
         jdkdir="$(find "$RUNTIME_DIR" -maxdepth 1 -type d -name "jdk-${JDK_MAJOR}*" | head -1)"
         [ -n "$jdkdir" ] || { log "JDK 解压失败"; exit 1; }

@@ -34,12 +34,12 @@ reference/annotations.md    # 实体生成规范（决策表 + 常见坑）
 reference/erupt-*.md        # erupt 官方参考文档（注解字典、i18n、查询、Cube、API、TPL）
 template/                   # 可运行的 erupt 项目模板（erupt 2.0.4 + Spring Boot 3.5 + H2）
   └─ resources/public/      # app.js / app.css：标题、Logo、主题色、样式自定义入口
-vendor/jdk/                 # 内置精简版 Temurin JDK 25（mac arm64 / linux x64）
+vendor/jdk/                 # 内置精简版 Temurin JDK 25（mac arm64 / linux x64 / windows x64）
 scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 内置 JDK → 在线下载）
 scripts/run.sh              # 一键构建并启动
 ```
 
 ## 环境要求
 
-- macOS / Linux（Windows 需自装 JDK 17+ 与 Maven）
+- macOS / Linux / Windows（Windows 需在 Git Bash 中运行，Claude Code 已自带）
 - 可访问网络（首次下载 Maven 与项目依赖；JDK 已内置无需下载）

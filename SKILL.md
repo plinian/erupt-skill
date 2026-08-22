@@ -20,7 +20,7 @@ bash <skill目录>/scripts/setup-env.sh
 这样在你解析需求、编写代码的同时，JDK 与 Maven 已在并行下载。环境说明：
 
 - 系统已有 JDK 17+ 和 Maven 时直接复用，秒级完成
-- 无系统 JDK 时使用 skill 内置的精简版 **Eclipse Temurin JDK 25**（`vendor/jdk/`，含 mac arm64 与 linux x64，GPLv2 + Classpath Exception 协议，无授权问题），解压到 `~/.erupt-skill/runtime` 即用，无需下载
+- 无系统 JDK 时使用 skill 内置的精简版 **Eclipse Temurin JDK 25**（`vendor/jdk/`，含 mac arm64、linux x64、windows x64，GPLv2 + Classpath Exception 协议，无授权问题），解压到 `~/.erupt-skill/runtime` 即用，无需下载
 - 内置包无对应平台时才在线下载：官方源失败自动切清华镜像；Maven 3.9 自动下载，依赖默认走阿里云镜像
 
 ### 第 1 步：需求解析
@@ -93,7 +93,7 @@ bash <skill目录>/scripts/run.sh <项目目录> [端口]
 | 端口占用 `Port 8080 was already in use` | 换端口：`run.sh <dir> 8081` |
 | 启动报 JPA 列类型冲突 | 实体字段类型变更导致，删除项目 `data/` 目录重启 |
 | Lombok 相关编译错误 | 确认实体类有 `@Getter @Setter`，不要手写 getter/setter |
-| Windows 环境 | 脚本仅支持 macOS/Linux；Windows 需用户自装 [JDK 17](https://adoptium.net) 与 [Maven](https://maven.apache.org)，然后直接 `mvn spring-boot:run` |
+| Windows 环境 | 脚本需在 Git Bash / MSYS 中运行（Claude Code on Windows 自带 Git Bash），内置 windows x64 JDK 可直接使用；脚本跑不通时可自装 [JDK 17](https://adoptium.net) 与 [Maven](https://maven.apache.org) 后直接 `mvn spring-boot:run` |
 
 ## 能力边界
 
