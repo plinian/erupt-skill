@@ -4,7 +4,7 @@
 
 基于 [erupt](https://www.erupt.xyz) 低代码框架：说一句「帮我生成一个图书管理后台」，即可得到一个完整可运行的管理系统 —— 登录页、增删改查、搜索、导入导出、权限管理开箱即用。
 
-**无需开发环境**：仓库内置精简版 Eclipse Temurin JDK 25（GPLv2 + Classpath Exception，无授权问题，覆盖 macOS Apple Silicon 与 Linux x64；其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
+**无需开发环境**：仓库内置精简版 Eclipse Temurin JDK 25（GPLv2 + Classpath Exception，无授权问题，覆盖 macOS Apple Silicon、Linux x64、Windows x64；其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
 
 ## 安装
 
