@@ -1,0 +1,191 @@
+# Erupt 实体生成规范（速查）
+
+生成实体类时严格遵循本文档。erupt 版本 2.0.4，JPA 用 `jakarta.persistence.*`。
+完整注解字典（@Erupt/@EruptField 所有属性与枚举）见 [erupt-model.md](erupt-model.md)，本文档只覆盖生成时的决策规则与项目约定。
+
+## 实体类骨架（标准模板）
+
+```java
+package app.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import xyz.erupt.annotation.Erupt;
+import xyz.erupt.annotation.EruptField;
+import xyz.erupt.annotation.sub_erupt.Power;
+import xyz.erupt.annotation.sub_field.Edit;
+import xyz.erupt.annotation.sub_field.EditType;
+import xyz.erupt.annotation.sub_field.View;
+import xyz.erupt.annotation.sub_field.sub_edit.*;
+import xyz.erupt.jpa.model.BaseModel;
+
+@Erupt(name = "图书管理", power = @Power(export = true, importable = true))
+@Table(name = "t_book")
+@Entity
+@Getter
+@Setter
+public class Book extends BaseModel {
+
+    @EruptField(
+            views = @View(title = "书名"),
+            edit = @Edit(title = "书名", notNull = true, search = @Search)
+    )
+    private String title;
+}
+```
+
+要点：
+- 继承 `xyz.erupt.jpa.model.BaseModel` 自动获得自增主键 `Long id`，实体里不要再写 id
+- 表名统一 `t_` 前缀小写下划线；类名/字段名英文，`@View/@Edit` 的 title 用用户语言（通常中文）
+- 每个业务字段都写 `@EruptField`，`views` 与 `edit` 的 title 保持一致
+- 关键字段加 `search = @Search`（列表页可搜索），默认按编辑类型自动推断查询方式；需强制模糊查询时写 `search = @Search(operator = QueryExpression.LIKE)`（import `xyz.erupt.annotation.config.QueryExpression`）
+- 必填字段加 `notNull = true`
+
+## @Erupt 类注解常用属性
+
+| 属性 | 说明 | 示例 |
+|------|------|------|
+| `name` | 菜单/功能名（必填） | `name = "图书管理"` |
+| `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)` |
+| `orderBy` | 默认排序 | `orderBy = "createTime desc"` |
+| `desc` | 功能描述 | `desc = "管理所有图书"` |
+| `tree` | 树形展示 | 见下文「树形结构」 |
+
+## 字段类型 → EditType 映射决策表
+
+不写 `type` 时为 `EditType.AUTO`，会按 Java 类型自动推断（String→INPUT、数值→NUMBER、Boolean→BOOLEAN、Date→DATE），简单字段可省略 type。
+
+| 业务语义 | Java 类型 | 写法 |
+|---------|-----------|------|
+| 短文本（名称、编号） | String | `@Edit(title = "x", notNull = true, search = @Search(vague = true))` |
+| 长文本（备注、简介） | String | `@Edit(title = "x", type = EditType.TEXTAREA)` |
+| 富文本（详情、内容） | String | `@Lob @Edit(title = "x", type = EditType.HTML_EDITOR)` 配 `views = @View(title = "x", type = ViewType.HTML)` |
+| 数字（数量、库存） | Integer | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
+| 金额（价格、费用） | Double / BigDecimal | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
+| 是/否开关 | Boolean | `@Edit(title = "x", boolType = @BoolType(trueText = "是", falseText = "否"))` |
+| 日期 | java.util.Date | `@Edit(title = "x", dateType = @DateType)` |
+| 日期时间 | java.util.Date | `@Edit(title = "x", dateType = @DateType(type = DateType.Type.DATE_TIME))` |
+| 固定选项（状态、分类） | Integer / String | `@Edit(title = "x", type = EditType.CHOICE, search = @Search, choiceType = @ChoiceType(vl = {@VL(value = "1", label = "上架"), @VL(value = "2", label = "下架")}))` |
+| 手机号 | String | `@Edit(title = "x", inputType = @InputType(regex = "^1[3-9]\\d{9}$"))` |
+| 邮箱 | String | `@Edit(title = "x", inputType = @InputType(regex = "^\\w+@\\w+\\.\\w+$"))` |
+| 密码 | String | `@Edit(title = "x", type = EditType.PASSWORD)` |
+| 图片上传 | String | `@Edit(title = "x", type = EditType.ATTACHMENT, attachmentType = @AttachmentType(type = AttachmentType.Type.IMAGE))` 配 `views = @View(title = "x", type = ViewType.IMAGE)` |
+| 附件上传 | String | `@Edit(title = "x", type = EditType.ATTACHMENT)` 配 `views = @View(title = "x", type = ViewType.DOWNLOAD)` |
+| 评分 | Integer | `@Edit(title = "x", type = EditType.RATE)` |
+| 滑块/百分比 | Integer | `@Edit(title = "x", type = EditType.SLIDER, sliderType = @SliderType(max = 100))` |
+| 颜色 | String | `@Edit(title = "x", type = EditType.COLOR)` |
+| 标签 | String | `@Edit(title = "x", type = EditType.TAGS, tagsType = @TagsType)` |
+| Markdown | String | `@Lob @Edit(title = "x", type = EditType.MARKDOWN)` |
+| 代码 | String | `@Lob @Edit(title = "x", type = EditType.CODE_EDITOR, codeEditType = @CodeEditorType(language = "sql"))` |
+
+注意：`type = EditType.CHOICE` 等需要子注解的类型必须同时写子注解；带子注解属性（boolType、dateType、numberType 等）时 type 可省略（AUTO 会识别）。
+
+## 关联关系
+
+### 多对一（下拉表格选择，最常用）
+```java
+@ManyToOne
+@EruptField(
+        views = @View(title = "所属分类", column = "name"),
+        edit = @Edit(title = "所属分类", type = EditType.REFERENCE_TABLE,
+                referenceTableType = @ReferenceTableType(label = "name"))
+)
+private Category category;
+```
+要点：`views` 必须写 `column = "name"`（引用对象的展示字段），否则列表显示对象地址。
+
+### 多对一（树形选择，引用对象是树时）
+```java
+@ManyToOne
+@EruptField(
+        views = @View(title = "所属部门", column = "name"),
+        edit = @Edit(title = "所属部门", type = EditType.REFERENCE_TREE,
+                referenceTreeType = @ReferenceTreeType(label = "name", pid = "parent.id"))
+)
+private Department department;
+```
+
+### 一对多（主表内联编辑子表）
+```java
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+@JoinColumn(name = "order_id")
+@EruptField(
+        edit = @Edit(title = "订单明细", type = EditType.TAB_TABLE_ADD)
+)
+private List<OrderItem> items;
+```
+要点：子表实体也要有 @Erupt 注解但可以不需要独立菜单；TAB_TABLE_ADD 不写 views。
+
+### 多对多（复选框）
+```java
+@ManyToMany
+@JoinTable(name = "t_book_tag",
+        joinColumns = @JoinColumn(name = "book_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id"))
+@EruptField(
+        edit = @Edit(title = "标签", type = EditType.CHECKBOX,
+                checkboxType = @CheckboxType(label = "name"))
+)
+private Set<Tag> tags;
+```
+
+## 树形结构（分类、部门、区域等）
+
+```java
+@Erupt(name = "分类管理", tree = @Tree(id = "id", label = "name", pid = "parent.id"))
+@Table(name = "t_category")
+@Entity
+@Getter
+@Setter
+public class Category extends BaseModel {
+
+    @EruptField(
+            views = @View(title = "名称"),
+            edit = @Edit(title = "名称", notNull = true)
+    )
+    private String name;
+
+    @ManyToOne
+    @EruptField(
+            edit = @Edit(title = "上级分类", type = EditType.REFERENCE_TREE,
+                    referenceTreeType = @ReferenceTreeType(pid = "parent.id"))
+    )
+    private Category parent;
+}
+```
+需要 import `xyz.erupt.annotation.sub_erupt.Tree`。
+
+## 菜单注册（必做，否则实体不会出现在后台）
+
+@Erupt 实体**不会**自动出现在菜单，必须在启动类 `Application.initMenus()` 中注册（模板已带 EruptModule 骨架，取消注释并补齐即可）：
+
+```java
+@Override
+public List<MetaMenu> initMenus() {
+    List<MetaMenu> menus = new ArrayList<>();
+    menus.add(MetaMenu.createRootMenu("$app", "业务管理", "fa fa-th-large", 10));
+    menus.add(MetaMenu.createEruptClassMenu(Book.class, menus.get(0), 10));
+    // 树形实体（@Erupt 带 tree 配置）必须指定 TREE 类型：
+    menus.add(MetaMenu.createEruptClassMenu(Category.class, menus.get(0), 20, MenuTypeEnum.TREE));
+    return menus;
+}
+```
+
+- import：`xyz.erupt.core.constant.MenuTypeEnum`、`xyz.erupt.core.module.*`、实体类
+- 配置 `erupt.init-method-enum: every`（模板已配）后按 code 幂等补插，新增实体加一行重启即生效
+- 仅作为子表内联（TAB_TABLE_ADD）的实体无需注册菜单
+- 一级分组用 `createRootMenu`，code 以 `$` 开头避免与实体类名冲突；sort 数值越小越靠前
+
+## 常见坑（务必避免）
+
+1. **@ManyToOne / @ManyToMany 必须显式写 EditType**（REFERENCE_TABLE / REFERENCE_TREE / CHECKBOX），AUTO 无法推断
+2. **引用字段的 @View 必须带 `column`**，指向对象的展示属性
+3. 树形 pid 是对象路径写法 `pid = "parent.id"`，不是外键列名
+4. UI 辅助字段（DIVIDE 分割线等）必须加 `@Transient`（jakarta 的）
+5. 富文本/长文本超过 255 字符要加 `@Lob`，否则 H2/MySQL 建列为 varchar(255)
+6. 不要用 java.time.LocalDateTime，日期统一用 `java.util.Date`
+7. 实体类都放在 `app.model` 包下，启动类 `@EruptScan`/`@EntityScan` 默认扫描 `app` 包
+8. 枚举选项值用 @VL 的 value 是字符串（存库时按字段 Java 类型转换）
+9. 每个实体必须有 `@Entity` + `@Table` + `@Erupt` + `@Getter` + `@Setter` 五件套

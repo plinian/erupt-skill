@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/__ARTIFACT_ID__;AUTO_SERVER=TRUE;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    show-sql: false
+    generate-ddl: true
+    database: h2
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        type.enumeration.use_named: false
+
+server:
+  port: 8080
+
+erupt:
+  # 每次启动幂等补插菜单/初始化数据，新增实体重启即出现在菜单
+  init-method-enum: every
+  upms:
+    default-account: erupt
+    default-password: erupt

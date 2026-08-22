@@ -1,0 +1,7 @@
+/* erupt 前端自定义样式：写入 CSS 即可覆盖后台默认样式，刷新页面生效 */
+
+/* 示例：修改登录页背景
+.login-container {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+*/

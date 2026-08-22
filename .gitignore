@@ -1,0 +1,42 @@
+HELP.md
+*/target/
+**/target/**
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/*
+!.idea/icon.svg
+!.idea/runConfigurations/**
+!.idea/fileTemplates/**
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+
+# project
+.erupt
+.DS_Store
+.xcodemap/
+*.db
+.claude/settings.local.json
