@@ -6,10 +6,10 @@ window.eruptSiteConfig = {
     desc: "__APP_DESC__",
     // 左上角 Logo 文字
     logoText: "__APP_TITLE__",
-    // Logo 图片路径，如 "/assets/logo.png"（放到 public/assets/ 下），为 null 时显示 logoText
-    logoPath: null,
+    // Logo 图片路径，如 "/assets/logo.png"（放到 public/assets/ 下），为 "" 时显示 logoText
+    logoPath: "",
     // 登录页 Logo
-    loginLogoPath: null,
+    loginLogoPath: "",
     // 是否显示版权信息
     copyright: true,
     // 主题色
