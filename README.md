@@ -6,7 +6,7 @@ A Claude Code Skill that generates a data admin backend from a single sentence.
 
 Powered by the [erupt](https://www.erupt.xyz) low-code framework: say "build me a library admin backend" and get a complete, runnable admin system — login page, CRUD, search, import/export, and permission management out of the box.
 
-**No dev environment required**: JDK 25 (Eclipse Temurin, GPLv2 + Classpath Exception) and Maven are downloaded automatically on first run (with mirror fallbacks) and cached in `~/.erupt-skill`; a system JDK 17+ is reused if present; project dependencies go through the Aliyun mirror; and an embedded H2 file database means no MySQL install. Non-developers can build a data admin backend for any domain with one sentence.
+**No dev environment required**: the repo bundles a trimmed Eclipse Temurin JDK 25 (GPLv2 + Classpath Exception, no licensing concerns; covers macOS Apple Silicon and Windows x64, other platforms download automatically), Maven is prepared automatically (cached in `~/.erupt-skill`), project dependencies go through the Aliyun mirror, and an embedded H2 file database means no MySQL install. Non-developers can build a data admin backend for any domain with one sentence.
 
 ## Install
 
@@ -48,14 +48,15 @@ reference/annotations.md    # entity generation spec (decision tables + common p
 reference/erupt-*.md        # official erupt reference docs (annotations, i18n, query, Cube, API, TPL)
 template/                   # runnable erupt project template (latest erupt release + Spring Boot 3.5 + H2)
   └─ resources/public/      # app.js / app.css: title, logo, theme color, style customization
-scripts/setup-env.sh        # prepare JDK + Maven (system JDK → local vendor package → online download)
+scripts/setup-env.sh        # prepare JDK + Maven (system JDK → bundled JDK → online download)
 scripts/compile.sh          # compile-only check (catch syntax errors after code changes)
 scripts/run.sh              # one-command build and start
 scripts/build-m2-seed.sh    # optional: build a local dependency seed into vendor/m2 for fully-offline first builds
-vendor/                     # optional local offline packages (git-ignored): jdk tarballs and the m2 seed
+vendor/jdk/                 # bundled trimmed Temurin JDK 25 (mac arm64 / windows x64; Linux downloads automatically)
+vendor/m2/                  # optional local dependency seed (git-ignored)
 ```
 
 ## Requirements
 
 - macOS / Linux / Windows (on Windows run inside Git Bash, which Claude Code ships with)
-- Network access (first run downloads JDK, Maven and project dependencies, all cached for reuse)
+- Network access (first run downloads Maven and project dependencies; the JDK is bundled, no download needed)
