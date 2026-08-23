@@ -6,7 +6,7 @@
 
 基于 [erupt](https://www.erupt.xyz) 低代码框架：说一句「帮我生成一个图书管理后台」，即可得到一个完整可运行的管理系统 —— 登录页、增删改查、搜索、导入导出、权限管理开箱即用。
 
-**无需开发环境**：仓库内置精简版 Eclipse Temurin JDK 25（GPLv2 + Classpath Exception，无授权问题，覆盖 macOS Apple Silicon 与 Windows x64；Linux 及其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），项目依赖走阿里云镜像加速，内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
+**无需开发环境**：仓库内置 jlink 裁剪的 OpenJDK 25 运行时（基于 Azul Zulu 构建，GPLv2 + Classpath Exception，无授权问题，每个约 46 MB，覆盖 macOS Apple Silicon 与 Windows x64；Linux 及其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），项目依赖走阿里云镜像加速，内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
 
 ## 安装
 
@@ -52,7 +52,8 @@ scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 内置 JDK →
 scripts/compile.sh          # 仅编译校验（改代码后快速发现语法错误）
 scripts/run.sh              # 一键构建并启动
 scripts/build-m2-seed.sh    # 可选：生成本地依赖种子到 vendor/m2，实现首次构建完全离线
-vendor/jdk/                 # 内置精简版 Temurin JDK 25（mac arm64 / windows x64，Linux 自动在线下载）
+scripts/build-jdk.sh        # 维护者用：jlink 构建 vendor/jdk 下的裁剪版 JDK 运行时
+vendor/jdk/                 # 内置 jlink 裁剪版 OpenJDK 25（mac arm64 / windows x64，Linux 自动在线下载）
 vendor/m2/                  # 可选本地依赖种子（不入 git）
 ```
 
