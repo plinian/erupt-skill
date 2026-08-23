@@ -59,7 +59,7 @@ public class Book extends BaseModel {
 
 | 业务语义 | Java 类型 | 写法 |
 |---------|-----------|------|
-| 短文本（名称、编号） | String | `@Edit(title = "x", notNull = true, search = @Search(vague = true))` |
+| 短文本（名称、编号） | String | `@Edit(title = "x", notNull = true, search = @Search(operator = QueryExpression.LIKE))` |
 | 长文本（备注、简介） | String | `@Edit(title = "x", type = EditType.TEXTAREA)` |
 | 富文本（详情、内容） | String | `@Lob @Edit(title = "x", type = EditType.HTML_EDITOR)` 配 `views = @View(title = "x", type = ViewType.HTML)` |
 | 数字（数量、库存） | Integer | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
@@ -266,3 +266,4 @@ public List<MetaMenu> initMenus() {
 7. 实体类都放在 `app.model` 包下，启动类 `@EruptScan`/`@EntityScan` 默认扫描 `app` 包
 8. 枚举选项值用 @VL 的 value 是字符串（存库时按字段 Java 类型转换）
 9. 每个实体必须有 `@Entity` + `@Table` + `@Erupt` + `@Getter` + `@Setter` 五件套
+10. **@Search 没有 `vague` 属性**（那是 erupt 1.x 的旧 API），模糊查询写 `@Search(operator = QueryExpression.LIKE)` 并 import `xyz.erupt.annotation.config.QueryExpression`

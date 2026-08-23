@@ -1,12 +1,12 @@
 # erupt-skill
 
-English | [简体中文](README.zh-CN.md)
+English | [简体中文](README-zh.md)
 
 A Claude Code Skill that generates a data admin backend from a single sentence.
 
 Powered by the [erupt](https://www.erupt.xyz) low-code framework: say "build me a library admin backend" and get a complete, runnable admin system — login page, CRUD, search, import/export, and permission management out of the box.
 
-**No dev environment required**: the repo bundles a trimmed Eclipse Temurin JDK 25 (GPLv2 + Classpath Exception, no licensing concerns; covers macOS Apple Silicon and Windows x64, other platforms download automatically), Maven is prepared automatically (cached in `~/.erupt-skill`), and an embedded H2 file database means no MySQL install. Non-developers can build a data admin backend for any domain with one sentence.
+**No dev environment required**: the repo bundles a trimmed Eclipse Temurin JDK 25 (GPLv2 + Classpath Exception, no licensing concerns; covers macOS Apple Silicon and Windows x64, other platforms download automatically), Maven is prepared automatically (cached in `~/.erupt-skill`), project dependencies are pre-bundled (`vendor/m2/`, seeded into `~/.m2/repository` on first run so the first build needs almost no downloads), and an embedded H2 file database means no MySQL install. Non-developers can build a data admin backend for any domain with one sentence.
 
 ## Install
 
@@ -49,11 +49,13 @@ reference/erupt-*.md        # official erupt reference docs (annotations, i18n, 
 template/                   # runnable erupt project template (latest erupt release + Spring Boot 3.5 + H2)
   └─ resources/public/      # app.js / app.css: title, logo, theme color, style customization
 vendor/jdk/                 # bundled trimmed Temurin JDK 25 (mac arm64 / windows x64; Linux downloads automatically)
+vendor/m2/                  # pre-bundled Maven dependencies (seeded into ~/.m2/repository on first run, no downloads)
 scripts/setup-env.sh        # prepare JDK + Maven (system JDK → bundled JDK → online download)
+scripts/compile.sh          # compile-only check (catch syntax errors after code changes)
 scripts/run.sh              # one-command build and start
 ```
 
 ## Requirements
 
 - macOS / Linux / Windows (on Windows run inside Git Bash, which Claude Code ships with)
-- Network access (first run downloads Maven and project dependencies; the JDK is bundled, no download needed)
+- Network access (only Maven itself may be downloaded on first run; the JDK and project dependencies are bundled)

@@ -115,6 +115,18 @@ else
     MVN_CMD="$mvn_home/bin/mvn"
 fi
 
+# ---------- 预置 Maven 依赖（skill 内置，首次构建免下载） ----------
+VENDOR_M2_DIR="$SCRIPT_DIR/../vendor/m2"
+seed_marker="$SKILL_HOME/.m2-seeded"
+if [ ! -f "$seed_marker" ] && ls "$VENDOR_M2_DIR"/m2-repo.tar.gz.part-* >/dev/null 2>&1; then
+    m2_repo="$HOME/.m2/repository"
+    mkdir -p "$m2_repo"
+    log "预置 Maven 依赖到 $m2_repo ..."
+    cat "$VENDOR_M2_DIR"/m2-repo.tar.gz.part-* | tar -xzf - -C "$m2_repo"
+    touch "$seed_marker"
+    log "依赖预置完成（后续构建直接复用，删除 $seed_marker 可重新预置）"
+fi
+
 # ---------- Maven 镜像（阿里云，加速依赖下载，可用 ERUPT_SKILL_NO_MIRROR=1 关闭） ----------
 MVN_SETTINGS_ARG=""
 if [ "${ERUPT_SKILL_NO_MIRROR:-}" != "1" ]; then

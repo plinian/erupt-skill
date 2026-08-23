@@ -6,7 +6,7 @@
 
 基于 [erupt](https://www.erupt.xyz) 低代码框架：说一句「帮我生成一个图书管理后台」，即可得到一个完整可运行的管理系统 —— 登录页、增删改查、搜索、导入导出、权限管理开箱即用。
 
-**无需开发环境**：仓库内置精简版 Eclipse Temurin JDK 25（GPLv2 + Classpath Exception，无授权问题，覆盖 macOS Apple Silicon 与 Windows x64；Linux 及其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
+**无需开发环境**：仓库内置精简版 Eclipse Temurin JDK 25（GPLv2 + Classpath Exception，无授权问题，覆盖 macOS Apple Silicon 与 Windows x64；Linux 及其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），项目依赖已预置（`vendor/m2/`，首次运行自动填充到 `~/.m2/repository`，首次构建几乎无需联网下载），内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
 
 ## 安装
 
@@ -49,11 +49,13 @@ reference/erupt-*.md        # erupt 官方参考文档（注解字典、i18n、�
 template/                   # 可运行的 erupt 项目模板（erupt 追 Maven 最新 release + Spring Boot 3.5 + H2）
   └─ resources/public/      # app.js / app.css：标题、Logo、主题色、样式自定义入口
 vendor/jdk/                 # 内置精简版 Temurin JDK 25（mac arm64 / windows x64，Linux 自动在线下载）
+vendor/m2/                  # 预置 Maven 依赖包（首次运行填充到 ~/.m2/repository，构建免下载）
 scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 内置 JDK → 在线下载）
+scripts/compile.sh          # 仅编译校验（改代码后快速发现语法错误）
 scripts/run.sh              # 一键构建并启动
 ```
 
 ## 环境要求
 
 - macOS / Linux / Windows（Windows 需在 Git Bash 中运行，Claude Code 已自带）
-- 可访问网络（首次下载 Maven 与项目依赖；JDK 已内置无需下载）
+- 可访问网络（首次仅可能需下载 Maven 本体；JDK 与项目依赖均已内置）

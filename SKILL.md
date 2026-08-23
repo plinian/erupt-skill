@@ -37,18 +37,24 @@ bash <skill目录>/scripts/setup-env.sh
 
 1. 项目名用英文 kebab-case（如 `library-admin`），在用户当前目录下创建
 2. 复制本 skill 的 `template/` 目录到项目目录
-3. 将 `pom.xml` 和 `src/main/resources/application.yml` 中的 `__ARTIFACT_ID__` 全部替换为项目名
-4. **erupt 版本追最新**：查询 Maven 仓库版本列表，取语义化排序最大的正式版，更新 pom.xml 的 `<erupt.version>`：
+3. 将模板中**所有文件**的 `__ARTIFACT_ID__` 全部替换为项目名（涉及 `pom.xml`、`application.yml`、`Application.java` 三处，建议全局搜索确认无遗漏）
+4. **erupt 版本尽量用最新**：查询 Maven 仓库版本列表，取语义化排序最大的正式版，更新 pom.xml 的 `<erupt.version>`：
 
    ```bash
    curl -s --max-time 10 "https://maven.aliyun.com/repository/public/xyz/erupt/erupt-spring-boot-starter/maven-metadata.xml" \
      | grep -oE "<version>[0-9]+\.[0-9]+\.[0-9]+</version>" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | sort -V | tail -1
    ```
 
-   注意：
+   版本选择规则：
+   - 取「模板默认版本」与「查询结果」中**较高**者，但采用前必须校验该版本真实存在（如下），不存在则用查询到的最新已发布版本：
+
+     ```bash
+     curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://maven.aliyun.com/repository/public/xyz/erupt/erupt-spring-boot-starter/<版本>/erupt-spring-boot-starter-<版本>.pom"   # 200 才可用
+     ```
+
    - **版本号必须来自上述命令的实际输出，严禁凭记忆或训练数据填写**（曾出现过误写 1.13.0 旧版本的情况）
    - artifact 固定为 `erupt-spring-boot-starter`，不要查 `erupt`、`erupt-core` 等其他 artifact
-   - 阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；查询结果低于模板默认版本或两源都失败时，保留模板默认版本，不要阻塞生成流程
+   - 阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；两源都失败时保留模板默认版本，不要阻塞生成流程
 5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
 6. 在 `src/main/java/app/model/` 下编写实体类
 
@@ -77,7 +83,14 @@ bash <skill目录>/scripts/run.sh <项目目录> [端口]
 
 ### 第 5 步：迭代（用户继续一句话提需求）
 
-- 加字段 / 加实体：直接改代码，重启即可（`generate-ddl: true` 会自动加列、建表）
+**任何 Java 代码改动后，必须先前台编译校验，通过后再重启，不要只改代码不验证**：
+
+```bash
+bash <skill目录>/scripts/compile.sh <项目目录>
+```
+
+- 编译报错时根据错误信息修复（缺 import、注解属性写错、类型不匹配等），修到编译通过为止
+- 加字段 / 加实体：改代码 → 编译校验 → 重启（`generate-ddl: true` 会自动加列、建表）
 - 改外观（标题、Logo、主题色、样式）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置）和 `app.css`（自定义样式），无需改 Java 代码，重启后刷新页面生效
 - 改字段类型 / 删字段：H2 不会自动删旧列，若启动报错，提示用户可删除项目 `data/` 目录重置数据后重启
 - 换数据库：MySQL 等生产库只需改 `application.yml` 的 datasource 并在 pom 加对应驱动

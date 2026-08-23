@@ -19,7 +19,7 @@
     <properties>
         <java.version>17</java.version>
         <!-- 生成时自动更新为 Maven 仓库最新 release，此处为查询失败时的兜底版本 -->
-        <erupt.version>2.0.4</erupt.version>
+        <erupt.version>2.1.0</erupt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
