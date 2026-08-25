@@ -39,6 +39,20 @@ public class Book extends BaseModel {
 要点：
 - 继承 `xyz.erupt.jpa.model.BaseModel` 自动获得自增主键 `Long id`，实体里不要再写 id
 - 表名统一 `t_` 前缀小写下划线；类名/字段名英文，`@View/@Edit` 的 title 用用户语言（通常中文）
+
+### 基类选择（决定实体自带哪些字段）
+
+按需选基类，**`orderBy`、搜索、展示只能引用实体或其基类里已声明的字段**：
+
+| 基类 | 包 | 额外字段 | 何时用 |
+|------|----|---------|--------|
+| `BaseModel` | `xyz.erupt.jpa.model` | 仅 `id` | 不需要审计时间的简单实体 |
+| `MetaModelUpdateVo` | `xyz.erupt.jpa.model` | `createTime` / `updateTime` / `createBy` / `updateBy`（`@PrePersist/@PreUpdate` 自动填充；`updateBy`/`updateTime` 列表可见且编辑只读，`createBy`/`createTime` 隐藏） | **推荐默认基类**：需要按创建时间排序、且想在列表展示"最后修改人/时间"时 |
+| `HyperModelUpdateVo` | `xyz.erupt.upms.helper` | 同上，但把 `createBy`/`updateBy` 换成关联操作人对象 `createUser` / `updateUser`（列表展示用户名） | 需要展示"谁创建/谁修改"的用户对象时 |
+
+> 说明：另有 `MetaModel`（`xyz.erupt.jpa.model`）/ `HyperModel`（`xyz.erupt.upms.model.base`）字段相同但审计列全部 `show=false` 隐藏，一般更推荐用上表的 `*UpdateVo` 变体，修改痕迹默认可见更实用。
+
+**常见坑**：想用 `orderBy = "createTime desc"` 却继承了 `BaseModel` → 启动正常，但打开列表页查询时抛 `PathElementException: Could not resolve attribute 'createTime'`。要么改继承 `MetaModelUpdateVo`，要么把 orderBy 换成 `id desc`。
 - 每个业务字段都写 `@EruptField`，`views` 与 `edit` 的 title 保持一致
 - 关键字段加 `search = @Search`（列表页可搜索），默认按编辑类型自动推断查询方式；需强制模糊查询时写 `search = @Search(operator = QueryExpression.LIKE)`（import `xyz.erupt.annotation.config.QueryExpression`）
 - 必填字段加 `notNull = true`
@@ -49,7 +63,7 @@ public class Book extends BaseModel {
 |------|------|------|
 | `name` | 菜单/功能名（必填） | `name = "图书管理"` |
 | `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)` |
-| `orderBy` | 默认排序 | `orderBy = "createTime desc"` |
+| `orderBy` | 默认排序（字段须在实体或基类中已声明） | `orderBy = "id desc"`；按创建时间排序须继承 `MetaModelUpdateVo` 才能用 `orderBy = "createTime desc"` |
 | `desc` | 功能描述 | `desc = "管理所有图书"` |
 | `tree` | 树形展示 | 见下文「树形结构」 |
 
@@ -267,3 +281,5 @@ public List<MetaMenu> initMenus() {
 8. 枚举选项值用 @VL 的 value 是字符串（存库时按字段 Java 类型转换）
 9. 每个实体必须有 `@Entity` + `@Table` + `@Erupt` + `@Getter` + `@Setter` 五件套
 10. **@Search 没有 `vague` 属性**（那是 erupt 1.x 的旧 API），模糊查询写 `@Search(operator = QueryExpression.LIKE)` 并 import `xyz.erupt.annotation.config.QueryExpression`
+11. **`QueryExpression` 只有 `EQ / GT / LT / LIKE / IN / RANGE`**，没有 `GE / LE / NE / BETWEEN`；范围查询用 `RANGE`
+12. **`orderBy`/搜索/展示引用的字段必须真实存在**：`createTime`/`updateTime` 仅 `MetaModelUpdateVo`/`HyperModelUpdateVo`（非 `BaseModel`）才有，否则查询时抛 `PathElementException`（见上文「基类选择」）

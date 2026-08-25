@@ -63,60 +63,63 @@ nav .links a, .lang-btn {
 nav .links a:hover, .lang-btn:hover { border-color: var(--ink); background: var(--yellow); box-shadow: var(--shadow-sm); }
 .lang-btn { border-color: var(--ink); font-weight: 700; }
 
-/* ---------- hero ---------- */
+/* ---------- hero (centered poster) ---------- */
 .hero {
-    padding: 62px 0 68px; position: relative; overflow: hidden;
+    padding: 96px 0 92px; position: relative; overflow: hidden;
     background: var(--cream);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
     border-bottom: 2px solid var(--ink);
+    text-align: center;
 }
-.hero-grid { display: grid; grid-template-columns: 1.02fr 1.1fr; gap: 48px; align-items: center; }
-@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+.hero .wrap { position: relative; z-index: 2; }
 
 /* kicker */
 .kicker {
     display: inline-flex; align-items: center; gap: 9px;
-    font-family: var(--mono); font-weight: 800; font-size: 11.5px;
-    text-transform: uppercase; letter-spacing: .12em; color: var(--ink);
+    font-family: var(--mono); font-weight: 800; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .14em; color: var(--ink);
     background: var(--brand); border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
-    padding: 5px 13px 5px 11px; transform: rotate(-1deg); margin-bottom: 26px;
+    padding: 6px 15px; margin-bottom: 34px;
 }
 .kicker::before { content: ""; width: 9px; height: 9px; background: var(--ink); }
 
 .hero h1 {
     font-family: var(--display);
-    font-size: clamp(36px, 6.1vw, 64px);
-    line-height: 1.1; letter-spacing: -1.2px;
-    max-width: 880px;
+    font-size: clamp(40px, 6.6vw, 76px);
+    line-height: 1.05; letter-spacing: -1.8px;
+    max-width: 15ch; margin: 0 auto;
 }
 .hero h1 .hl {
     background: var(--brand); color: var(--ink);
-    border: 3px solid var(--ink); box-shadow: var(--shadow-sm);
-    padding: 0 14px 4px; display: inline-block; transform: rotate(-1.4deg);
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    padding: 0 16px 7px; display: inline-block; transform: rotate(-1.6deg);
+    margin-top: 8px;
 }
-.hero p.sub { font-size: 18px; margin: 26px 0 0; max-width: 630px; color: var(--ink2); }
-.hero p.sub b { background: var(--yellow); color: var(--ink); padding: 1px 5px; border: 1.5px solid var(--ink); font-weight: 700; }
+.hero p.sub { font-size: 18px; margin: 30px auto 0; max-width: 580px; color: var(--ink2); }
+.hero p.sub b { background: var(--yellow); color: var(--ink); padding: 1px 6px; border: 1.5px solid var(--ink); font-weight: 700; }
 
-/* fake prompt input */
+/* centered prompt input */
 .prompt {
     display: flex; align-items: center; gap: 12px;
-    max-width: 560px; margin-top: 30px;
-    background: var(--bg); border: 2px solid var(--ink);
-    box-shadow: 4px 4px 0 var(--ink);
-    padding: 13px 13px 13px 16px;
+    max-width: 600px; margin: 42px auto 0;
+    background: var(--bg); border: 2.5px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 15px 15px 15px 20px; text-align: left;
 }
-.prompt .p-sign { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--ink); opacity: .45; }
-.prompt .p-text { flex: 1; font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--ink); white-space: nowrap; overflow: hidden; }
+.prompt .p-sign { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--ink); opacity: .4; }
+.prompt .p-text { flex: 1; font-family: var(--mono); font-weight: 700; font-size: 15.5px; color: var(--ink); white-space: nowrap; overflow: hidden; }
 .prompt .p-key {
     font-family: var(--mono); font-weight: 800; font-size: 12px; color: var(--ink);
     background: var(--pink); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
-    padding: 4px 10px; white-space: nowrap;
+    padding: 5px 11px; white-space: nowrap;
 }
 
-.cta-row { display: flex; gap: 16px; margin-top: 30px; flex-wrap: wrap; }
+.cta-row { display: flex; gap: 16px; margin-top: 26px; justify-content: center; flex-wrap: wrap; }
 .btn {
     font-family: var(--mono); font-weight: 800; font-size: 14px;
     text-decoration: none; color: var(--ink);
-    border: 2px solid var(--ink); padding: 12px 24px;
+    border: 2px solid var(--ink); padding: 13px 28px;
     background: var(--pink); box-shadow: var(--shadow);
     transition: transform .15s ease, box-shadow .15s ease;
     display: inline-block;
@@ -125,71 +128,21 @@ nav .links a:hover, .lang-btn:hover { border-color: var(--ink); background: var(
 .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
 .btn.alt { background: var(--bg); }
 
-/* "turns into a panel" chip strip */
-.works { margin-top: 36px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.works-label { font-family: var(--mono); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink2); }
-.chips { display: flex; gap: 10px; flex-wrap: wrap; }
+/* subtle chip strip */
+.works { margin-top: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.works-label { font-family: var(--mono); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink2); margin-right: 4px; }
 .chip {
     font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--ink);
-    border: 2px solid var(--ink); padding: 5px 12px; background: var(--bg);
+    border: 2px solid var(--ink); padding: 5px 13px; background: var(--bg);
     box-shadow: var(--shadow-sm);
+    transition: transform .15s ease, box-shadow .15s ease;
 }
-.chip:nth-child(2n) { transform: rotate(1.6deg); }
-.chip:nth-child(2n+1) { transform: rotate(-1.6deg); }
+.chip:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
 .chip.c1 { background: var(--pink); }
 .chip.c2 { background: var(--purple); }
 .chip.c3 { background: var(--yellow); }
 .chip.c4 { background: var(--green); }
 .chip.c5 { background: var(--brand); }
-
-/* mock admin panel (hero visual) */
-.admin {
-    background: var(--bg); border: 2px solid var(--ink);
-    box-shadow: 9px 9px 0 var(--ink); transform: rotate(-1deg);
-    overflow: hidden;
-}
-@media (max-width: 960px) { .admin { transform: none; box-shadow: 6px 6px 0 var(--ink); } }
-.admin-bar { display: flex; align-items: center; gap: 7px; padding: 9px 13px; border-bottom: 2px solid var(--ink); background: var(--cream); }
-.admin-bar .dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); }
-.admin-bar .dot.r { background: var(--pink); } .admin-bar .dot.y { background: var(--yellow); } .admin-bar .dot.g { background: var(--green); }
-.admin-bar .file { margin-left: 8px; font-family: var(--mono); font-size: 11px; color: var(--ink2); }
-
-.admin-body { display: flex; }
-.admin-side { width: 140px; flex-shrink: 0; border-right: 2px solid var(--ink); padding: 13px 11px; background: var(--cream); }
-.admin-brand { font-family: var(--display); font-size: 13px; margin-bottom: 14px; letter-spacing: -.3px; }
-.admin-brand em { font-style: normal; background: var(--brand); border: 1.5px solid var(--ink); padding: 0 4px; }
-.admin-menu { display: flex; flex-direction: column; gap: 3px; }
-.admin-menu a {
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-weight: 700; font-size: 11.5px; color: var(--ink2);
-    padding: 6px 8px; text-decoration: none; border: 2px solid transparent;
-}
-.admin-menu a::before { content: ""; width: 7px; height: 7px; border: 1.5px solid var(--ink); background: var(--bg); flex-shrink: 0; }
-.admin-menu a.on { background: var(--brand); color: var(--ink); border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-.admin-menu a.on::before { background: var(--ink); }
-
-.admin-main { flex: 1; min-width: 0; padding: 13px 15px 15px; }
-.admin-tool { display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
-.admin-search { flex: 1; min-width: 0; border: 2px solid var(--ink); padding: 5px 9px; font-family: var(--mono); font-size: 11px; color: var(--ink2); background: var(--bg); }
-.admin-btn { font-family: var(--mono); font-weight: 800; font-size: 11px; color: var(--ink); border: 2px solid var(--ink); padding: 5px 11px; box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
-.admin-btn.add { background: var(--green); }
-.admin-btn.exp { background: var(--bg); }
-
-.admin-tbl { width: 100%; border-collapse: collapse; }
-.admin-tbl th { font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; font-size: 9.5px; text-align: left; padding: 7px 8px; border-bottom: 2px solid var(--ink); color: var(--ink2); }
-.admin-tbl td { padding: 8px; border-bottom: 1.5px dashed var(--mute); font-size: 11.5px; color: var(--ink); white-space: nowrap; }
-.admin-tbl tr:last-child td { border-bottom: none; }
-.admin-tbl .mono { font-family: var(--mono); font-size: 11px; color: var(--ink2); }
-.pill { font-family: var(--mono); font-weight: 700; font-size: 10px; color: var(--ink); border: 1.5px solid var(--ink); padding: 1px 8px; }
-.pill.on { background: var(--green); } .pill.off { background: var(--mute); }
-
-.admin-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 11px; border-top: 2px solid var(--ink); }
-.admin-foot .cnt { font-family: var(--mono); font-size: 10.5px; color: var(--ink2); }
-.pager { display: flex; gap: 5px; }
-.pager i { width: 8px; height: 8px; background: var(--mute); display: block; }
-.pager i.on { background: var(--brand); }
-@keyframes bob { 0%,100% { translate: 0 0; } 50% { translate: 0 -9px; } }
-@media (max-width: 400px) { .admin-side { display: none; } }
 
 /* ---------- prompt cursor ---------- */
 .cursor { display: inline-block; width: 8px; height: 17px; background: var(--ink); vertical-align: -3px; animation: blink 1s steps(1) infinite; }
@@ -277,81 +230,32 @@ footer a { color: var(--ink); }
 </nav>
 
 <header class="hero">
-    <div class="wrap hero-grid">
-        <div class="hero-copy">
-            <span class="kicker"><span class="en">Claude Code Skill · built on erupt</span><span class="zh">Claude Code 技能 · 基于 erupt</span></span>
-            <h1 class="en">One sentence,<br>and <span class="hl">any tool</span><br>becomes an admin panel</h1>
-            <h1 class="zh">一句话，<br>把<span class="hl">任何工具</span><br>变成可视化后台</h1>
-            <p class="sub en">Recruiting, HR, game ops, CRM, inventory — even local tools like VSCode, Nginx or your Mac. Say one sentence and get login, CRUD, search, Excel import/export and RBAC, ready to use. <b>1/20 the tokens of writing it from scratch</b>.</p>
-            <p class="sub zh">招聘、HR、游戏运营、CRM、进销存，甚至 VSCode、Nginx、Mac 这样的本机工具。说一句话，登录页、增删改查、搜索、导入导出、权限管理全部就绪。<b>token 消耗仅为从零手写的 1/20</b>。</p>
-            <div class="prompt">
-                <span class="p-sign">$</span>
-                <span class="p-text" id="rot">Build an admin panel for my local VSCode</span><span class="cursor"></span>
-                <span class="p-key">⏎ <span class="en">send</span><span class="zh">发送</span></span>
-            </div>
-            <div class="cta-row">
-                <a class="btn" href="#install"><span class="en">Install Now</span><span class="zh">立即安装</span></a>
-                <a class="btn alt" href="#token"><span class="en">See Token Benchmarks ↓</span><span class="zh">看 Token 实测 ↓</span></a>
-            </div>
+    <div class="wrap">
+        <span class="kicker"><span class="en">Claude Code Skill · built on erupt</span><span class="zh">Claude Code 技能 · 基于 erupt</span></span>
+        <h1 class="en">One sentence, and any tool becomes an <span class="hl">admin panel</span></h1>
+        <h1 class="zh">一句话，把任何工具<br>变成<span class="hl">可视化后台</span></h1>
+        <p class="sub en">Recruiting, HR, CRM, game ops — even local tools like VSCode or Nginx. Login, CRUD, search, Excel &amp; RBAC all included, at <b>1/20 the tokens</b> of writing it from scratch.</p>
+        <p class="sub zh">招聘、HR、CRM、游戏运营，甚至 VSCode、Nginx 这类本机工具。登录、增删改查、搜索、Excel、权限全内置，<b>token 仅为从零手写的 1/20</b>。</p>
+
+        <div class="prompt">
+            <span class="p-sign">$</span>
+            <span class="p-text" id="rot">Build an admin panel for my local VSCode</span><span class="cursor"></span>
+            <span class="p-key">⏎ <span class="en">send</span><span class="zh">发送</span></span>
         </div>
 
-        <div class="hero-panel">
-            <div class="admin rv">
-                <div class="admin-bar">
-                    <i class="dot r"></i><i class="dot y"></i><i class="dot g"></i>
-                    <span class="file">localhost:8080 · erupt / erupt</span>
-                </div>
-                <div class="admin-body">
-                    <aside class="admin-side">
-                        <div class="admin-brand"><em>VSCode</em> Admin</div>
-                        <nav class="admin-menu">
-                            <a class="on" href="#hero"><span class="en">Extensions</span><span class="zh">扩展</span></a>
-                            <a href="#hero"><span class="en">Workspaces</span><span class="zh">工作区</span></a>
-                            <a href="#hero"><span class="en">Snippets</span><span class="zh">代码片段</span></a>
-                            <a href="#hero"><span class="en">Preferences</span><span class="zh">偏好设置</span></a>
-                        </nav>
-                    </aside>
-                    <div class="admin-main">
-                        <div class="admin-tool">
-                            <span class="admin-search"><span class="en">Search extensions…</span><span class="zh">搜索扩展…</span></span>
-                            <span class="admin-btn add">+ <span class="en">New</span><span class="zh">新增</span></span>
-                            <span class="admin-btn exp"><span class="en">Export</span><span class="zh">导出</span></span>
-                        </div>
-                        <table class="admin-tbl">
-                            <thead>
-                                <tr>
-                                    <th><span class="en">Extension</span><span class="zh">扩展</span></th>
-                                    <th><span class="en">Version</span><span class="zh">版本</span></th>
-                                    <th><span class="en">Status</span><span class="zh">状态</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>GitLens</td><td class="mono">15.6.0</td><td><span class="pill on"><span class="en">Enabled</span><span class="zh">启用</span></span></td></tr>
-                                <tr><td>Prettier</td><td class="mono">11.0.0</td><td><span class="pill on"><span class="en">Enabled</span><span class="zh">启用</span></span></td></tr>
-                                <tr><td>ESLint</td><td class="mono">3.0.10</td><td><span class="pill on"><span class="en">Enabled</span><span class="zh">启用</span></span></td></tr>
-                                <tr><td>Vim</td><td class="mono">1.28.1</td><td><span class="pill off"><span class="en">Disabled</span><span class="zh">停用</span></span></td></tr>
-                                <tr><td>Docker</td><td class="mono">1.29.3</td><td><span class="pill on"><span class="en">Enabled</span><span class="zh">启用</span></span></td></tr>
-                            </tbody>
-                        </table>
-                        <div class="admin-foot">
-                            <span class="cnt"><span class="en">11 extensions · page 1 / 3</span><span class="zh">11 个扩展 · 第 1 / 3 页</span></span>
-                            <span class="pager"><i class="on"></i><i></i><i></i></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="cta-row">
+            <a class="btn" href="#install"><span class="en">Install Now</span><span class="zh">立即安装</span></a>
+            <a class="btn alt" href="#token"><span class="en">See Token Benchmarks ↓</span><span class="zh">看 Token 实测 ↓</span></a>
         </div>
-    </div>
 
-    <div class="wrap works">
-        <span class="works-label"><span class="en">Turns into a panel:</span><span class="zh">都能变成后台：</span></span>
-        <div class="chips">
+        <div class="works">
+            <span class="works-label"><span class="en">Turns into a panel:</span><span class="zh">都能变成后台：</span></span>
             <span class="chip c1">VSCode</span>
             <span class="chip c2"><span class="en">Recruiting</span><span class="zh">招聘</span></span>
             <span class="chip c3">HR</span>
             <span class="chip c4"><span class="en">Game Ops</span><span class="zh">游戏运营</span></span>
             <span class="chip c5">CRM</span>
-            <span class="chip c1"><span class="en">Nginx</span><span class="zh">Nginx</span></span>
+            <span class="chip c1">Nginx</span>
             <span class="chip c3"><span class="en">Anything…</span><span class="zh">任何系统…</span></span>
         </div>
     </div>
