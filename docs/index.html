@@ -53,8 +53,19 @@ nav {
     border-bottom: 2px solid var(--ink);
 }
 nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-.logo { font-family: var(--display); font-size: 20px; letter-spacing: -.5px; text-decoration: none; color: var(--ink); }
-.logo em { font-style: normal; background: var(--brand); padding: 0 6px; border: 2px solid var(--ink); }
+.logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-size: 21px; letter-spacing: -.5px; text-decoration: none; color: var(--ink); }
+.logo-mark {
+    width: 30px; height: 30px; display: grid; place-items: center;
+    background: var(--ink); color: var(--yellow);
+    border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
+    transform: rotate(-5deg); transition: transform .2s ease;
+}
+.logo:hover .logo-mark { transform: rotate(5deg) scale(1.08); }
+.logo-tag {
+    font-family: var(--mono); font-weight: 800; font-size: 10px; letter-spacing: .08em;
+    background: var(--yellow); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+    padding: 1px 6px; transform: rotate(-3deg) translateY(-7px);
+}
 nav .links { display: flex; gap: 8px; align-items: center; }
 nav .links a, .lang-btn {
     font-family: var(--mono); font-size: 13px; text-decoration: none; color: var(--ink);
@@ -63,16 +74,18 @@ nav .links a, .lang-btn {
 nav .links a:hover, .lang-btn:hover { border-color: var(--ink); background: var(--yellow); box-shadow: var(--shadow-sm); }
 .lang-btn { border-color: var(--ink); font-weight: 700; }
 
-/* ---------- hero (centered poster) ---------- */
+/* ---------- hero (split: copy x live admin window) ---------- */
 .hero {
-    padding: 96px 0 92px; position: relative; overflow: hidden;
+    padding: 76px 0 0; position: relative; overflow: hidden;
     background: var(--cream);
     background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
     background-size: 32px 32px;
     border-bottom: 2px solid var(--ink);
-    text-align: center;
 }
-.hero .wrap { position: relative; z-index: 2; }
+.hero-grid {
+    display: grid; grid-template-columns: 1.04fr .96fr;
+    gap: 56px; align-items: center; padding-bottom: 84px;
+}
 
 /* kicker */
 .kicker {
@@ -80,42 +93,41 @@ nav .links a:hover, .lang-btn:hover { border-color: var(--ink); background: var(
     font-family: var(--mono); font-weight: 800; font-size: 12px;
     text-transform: uppercase; letter-spacing: .14em; color: var(--ink);
     background: var(--brand); border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
-    padding: 6px 15px; margin-bottom: 34px;
+    padding: 6px 15px; margin-bottom: 28px;
 }
 .kicker::before { content: ""; width: 9px; height: 9px; background: var(--ink); }
 
 .hero h1 {
     font-family: var(--display);
-    font-size: clamp(40px, 6.6vw, 76px);
-    line-height: 1.05; letter-spacing: -1.8px;
-    max-width: 15ch; margin: 0 auto;
+    font-size: clamp(34px, 4.5vw, 58px);
+    line-height: 1.06; letter-spacing: -1.5px;
 }
 .hero h1 .hl {
     background: var(--brand); color: var(--ink);
     border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
-    padding: 0 16px 7px; display: inline-block; transform: rotate(-1.6deg);
+    padding: 0 13px 6px; display: inline-block; transform: rotate(-1.3deg);
     margin-top: 8px;
 }
-.hero p.sub { font-size: 18px; margin: 30px auto 0; max-width: 580px; color: var(--ink2); }
+.hero p.sub { font-size: 17px; margin: 24px 0 0; max-width: 520px; color: var(--ink2); }
 .hero p.sub b { background: var(--yellow); color: var(--ink); padding: 1px 6px; border: 1.5px solid var(--ink); font-weight: 700; }
 
-/* centered prompt input */
+/* prompt input */
 .prompt {
     display: flex; align-items: center; gap: 12px;
-    max-width: 600px; margin: 42px auto 0;
+    max-width: 560px; margin: 34px 0 0;
     background: var(--bg); border: 2.5px solid var(--ink);
     box-shadow: 6px 6px 0 var(--ink);
-    padding: 15px 15px 15px 20px; text-align: left;
+    padding: 14px 14px 14px 18px; text-align: left;
 }
 .prompt .p-sign { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--ink); opacity: .4; }
-.prompt .p-text { flex: 1; font-family: var(--mono); font-weight: 700; font-size: 15.5px; color: var(--ink); white-space: nowrap; overflow: hidden; }
+.prompt .p-text { flex: 1; min-width: 0; font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--ink); white-space: nowrap; overflow: hidden; }
 .prompt .p-key {
     font-family: var(--mono); font-weight: 800; font-size: 12px; color: var(--ink);
     background: var(--pink); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
     padding: 5px 11px; white-space: nowrap;
 }
 
-.cta-row { display: flex; gap: 16px; margin-top: 26px; justify-content: center; flex-wrap: wrap; }
+.cta-row { display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
 .btn {
     font-family: var(--mono); font-weight: 800; font-size: 14px;
     text-decoration: none; color: var(--ink);
@@ -128,25 +140,111 @@ nav .links a:hover, .lang-btn:hover { border-color: var(--ink); background: var(
 .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
 .btn.alt { background: var(--bg); }
 
-/* subtle chip strip */
-.works { margin-top: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.works-label { font-family: var(--mono); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink2); margin-right: 4px; }
-.chip {
-    font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--ink);
-    border: 2px solid var(--ink); padding: 5px 13px; background: var(--bg);
-    box-shadow: var(--shadow-sm);
-    transition: transform .15s ease, box-shadow .15s ease;
-}
-.chip:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
-.chip.c1 { background: var(--pink); }
-.chip.c2 { background: var(--purple); }
-.chip.c3 { background: var(--yellow); }
-.chip.c4 { background: var(--green); }
-.chip.c5 { background: var(--brand); }
-
 /* ---------- prompt cursor ---------- */
 .cursor { display: inline-block; width: 8px; height: 17px; background: var(--ink); vertical-align: -3px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- hero demo: fake erupt admin window ---------- */
+.hero-demo { position: relative; }
+.hero-demo::before { /* halftone dots */
+    content: ""; position: absolute; width: 200px; height: 200px;
+    right: -46px; top: -58px; z-index: 0;
+    background-image: radial-gradient(var(--ink) 2px, transparent 2.5px);
+    background-size: 14px 14px; opacity: .15;
+}
+.hero-demo::after { /* offset color slab */
+    content: ""; position: absolute; z-index: 0;
+    top: 20px; left: -16px; width: 100%; height: 100%;
+    background: var(--purple); border: 3px solid var(--ink);
+    transform: rotate(-1.8deg);
+}
+.win { position: relative; z-index: 1; border: 3px solid var(--ink); background: var(--bg); box-shadow: 8px 8px 0 var(--ink); }
+.win-bar { display: flex; align-items: center; gap: 7px; padding: 9px 14px; background: var(--brand); border-bottom: 3px solid var(--ink); }
+.win-bar .dot { width: 11px; height: 11px; border: 2px solid var(--ink); border-radius: 50%; background: var(--pink); }
+.win-bar .dot:nth-child(2) { background: var(--yellow); }
+.win-bar .dot:nth-child(3) { background: var(--green); }
+.win-title { font-family: var(--mono); font-weight: 700; font-size: 12px; margin-left: 8px; white-space: nowrap; overflow: hidden; }
+.win-body { display: grid; grid-template-columns: 126px 1fr; }
+.side { border-right: 2.5px solid var(--ink); background: var(--cream); padding: 10px 0 16px; font-family: var(--mono); font-size: 11.5px; font-weight: 700; }
+.side .mi { display: block; padding: 7px 14px; color: var(--ink2); white-space: nowrap; }
+.side .mi.on { background: var(--yellow); color: var(--ink); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+.side .mi.on::before { content: "▸ "; }
+.main { padding: 12px 12px 14px; min-width: 0; overflow: hidden; }
+html[lang="en"] .hero h1 { font-size: clamp(32px, 3.9vw, 50px); letter-spacing: -1.2px; }
+html[lang="zh-CN"] .hero h1 { font-size: clamp(30px, 3.6vw, 50px); }
+.tools { display: flex; gap: 8px; margin-bottom: 10px; }
+.t-search { flex: 1; min-width: 0; border: 2px solid var(--ink); background: var(--bg); font-family: var(--mono); font-size: 11px; color: var(--ink2); padding: 6px 9px; white-space: nowrap; overflow: hidden; }
+.t-btn { border: 2px solid var(--ink); background: var(--green); box-shadow: 2px 2px 0 var(--ink); font-family: var(--mono); font-weight: 800; font-size: 11px; padding: 6px 10px; white-space: nowrap; }
+.t-btn.x { background: var(--pink); }
+.grid-tbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 10.5px; }
+.grid-tbl th { background: var(--ink); color: var(--cream); text-align: left; font-size: 10px; letter-spacing: .04em; padding: 5px 6px; border: 1.5px solid var(--ink); }
+.grid-tbl td { border: 1.5px solid var(--ink); padding: 5px 6px; white-space: nowrap; }
+.grid-tbl tbody tr:nth-child(even) td { background: var(--cream); }
+.tag { display: inline-block; border: 1.5px solid var(--ink); background: var(--green); font-size: 10px; font-weight: 700; padding: 0 6px; }
+.tag.warn { background: var(--yellow); }
+.tag.stop { background: var(--pink); }
+.row-ops { letter-spacing: 2px; }
+.pager { display: flex; gap: 5px; justify-content: flex-end; margin-top: 10px; font-family: var(--mono); font-size: 10.5px; font-weight: 700; }
+.pg { border: 2px solid var(--ink); background: var(--bg); min-width: 22px; height: 22px; display: grid; place-items: center; }
+.pg.on { background: var(--brand); }
+.sticker {
+    position: absolute; top: -22px; right: -14px; z-index: 2;
+    background: var(--yellow); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    font-family: var(--mono); font-weight: 800; font-size: 13px;
+    padding: 8px 14px; transform: rotate(6deg); white-space: nowrap;
+}
+
+/* ---------- hero ticker ---------- */
+.ticker { border-top: 2px solid var(--ink); background: var(--ink); color: var(--cream); overflow: hidden; }
+.tk { display: flex; width: max-content; animation: tick 55s linear infinite; }
+.ticker:hover .tk { animation-play-state: paused; }
+.tk span { font-family: var(--mono); font-weight: 700; font-size: 13px; padding: 11px 0; white-space: nowrap; }
+.tk span::after { content: "★"; margin: 0 22px; color: var(--yellow); }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- hero entrance ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes winIn { from { opacity: 0; transform: translate(36px, 18px) rotate(2.5deg); } to { opacity: 1; transform: translate(0, 0) rotate(0deg); } }
+@keyframes pop { 0% { opacity: 0; transform: scale(0) rotate(26deg); } 80% { transform: scale(1.12) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(6deg); } }
+.hero-copy > * { animation: rise .55s cubic-bezier(.25, .8, .3, 1) both; }
+.hero-copy > *:nth-child(1) { animation-delay: .02s; }
+.hero-copy > *:nth-child(2), .hero-copy > *:nth-child(3) { animation-delay: .1s; }
+.hero-copy > *:nth-child(4), .hero-copy > *:nth-child(5) { animation-delay: .18s; }
+.hero-copy > *:nth-child(6) { animation-delay: .26s; }
+.hero-copy > *:nth-child(7) { animation-delay: .34s; }
+.hero-demo .win { animation: winIn .65s .3s cubic-bezier(.2, .75, .3, 1.1) both; }
+.hero-demo::after { animation: rise .5s .55s both; }
+.sticker { animation: pop .5s .9s both; }
+@media (prefers-reduced-motion: reduce) {
+    .hero-copy > *, .hero-demo .win, .hero-demo::after, .sticker, .tk { animation: none; }
+}
+
+@media (max-width: 920px) {
+    .hero { padding-top: 56px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 60px; padding-bottom: 64px; }
+    .hero-copy { text-align: center; }
+    .hero p.sub, .prompt { margin-left: auto; margin-right: auto; }
+    .cta-row { justify-content: center; }
+    .hero-demo { max-width: 540px; margin: 0 auto; min-width: 0; width: 100%; }
+}
+@media (max-width: 700px) {
+    nav .links a:not([href*="github"]) { display: none; }
+}
+@media (max-width: 560px) {
+    .win-body { grid-template-columns: 92px 1fr; }
+    .side { font-size: 10px; }
+    .side .mi { padding: 6px 10px; }
+    .main { padding: 10px 8px 12px; }
+    .grid-tbl { font-size: 9.5px; }
+    .grid-tbl th { font-size: 9px; padding: 4px 5px; }
+    .grid-tbl td { padding: 4px 5px; }
+    .tag { font-size: 9px; padding: 0 4px; }
+    .t-search, .t-btn { font-size: 10px; padding: 5px 7px; }
+    .win-title { font-size: 11px; }
+    .hero-demo::before { display: none; }
+    .hero-demo::after { left: -8px; top: 14px; }
+    .sticker { top: -24px; right: -4px; font-size: 12px; padding: 6px 11px; }
+}
 
 /* ---------- sections ---------- */
 section { padding: 80px 0; }
@@ -218,7 +316,10 @@ footer a { color: var(--ink); }
 
 <nav>
     <div class="wrap">
-        <a class="logo" href="#"><em>erupt</em>-skill</a>
+        <a class="logo" href="#">
+            <span class="logo-mark"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M13 2 4 14h6l-2 8 9-12h-6l2-8z" fill="currentColor"/></svg></span>
+            erupt<span class="logo-tag">SKILL</span>
+        </a>
         <div class="links">
             <a href="#token"><span class="en">Token Savings</span><span class="zh">Token 对比</span></a>
             <a href="#how"><span class="en">How It Works</span><span class="zh">工作原理</span></a>
@@ -230,33 +331,75 @@ footer a { color: var(--ink); }
 </nav>
 
 <header class="hero">
-    <div class="wrap">
-        <span class="kicker"><span class="en">Claude Code Skill · built on erupt</span><span class="zh">Claude Code 技能 · 基于 erupt</span></span>
-        <h1 class="en">One sentence, and any tool becomes an <span class="hl">admin panel</span></h1>
-        <h1 class="zh">一句话，把任何工具<br>变成<span class="hl">可视化后台</span></h1>
-        <p class="sub en">Recruiting, HR, CRM, game ops — even local tools like VSCode or Nginx. Login, CRUD, search, Excel &amp; RBAC all included, at <b>1/20 the tokens</b> of writing it from scratch.</p>
-        <p class="sub zh">招聘、HR、CRM、游戏运营，甚至 VSCode、Nginx 这类本机工具。登录、增删改查、搜索、Excel、权限全内置，<b>token 仅为从零手写的 1/20</b>。</p>
+    <div class="wrap hero-grid">
+        <div class="hero-copy">
+            <span class="kicker"><span class="en">Claude Code Skill · built on erupt</span><span class="zh">Claude Code 技能 · 基于 erupt</span></span>
+            <h1 class="en">One sentence, and any tool becomes an <span class="hl">admin panel</span></h1>
+            <h1 class="zh">一句话，把任何工具<br>变成<span class="hl">可视化后台</span></h1>
+            <p class="sub en">Talent, HR, CRM, game ops — even local tools like VSCode or Nginx. Login, CRUD, search, Excel &amp; RBAC all included, at <b>1/20 the tokens</b> of writing it from scratch.</p>
+            <p class="sub zh">招聘、HR、CRM、游戏运营，甚至 VSCode、Nginx 这类本机工具。登录、增删改查、搜索、Excel、权限全内置，<b>token 仅为从零手写的 1/20</b>。</p>
 
-        <div class="prompt">
-            <span class="p-sign">$</span>
-            <span class="p-text" id="rot">Build an admin panel for my local VSCode</span><span class="cursor"></span>
-            <span class="p-key">⏎ <span class="en">send</span><span class="zh">发送</span></span>
+            <div class="prompt">
+                <span class="p-sign">$</span>
+                <span class="p-text" id="rot">Build an admin panel for my local VSCode</span><span class="cursor"></span>
+                <span class="p-key">⏎ <span class="en">send</span><span class="zh">发送</span></span>
+            </div>
+
+            <div class="cta-row">
+                <a class="btn" href="#install"><span class="en">Install Now</span><span class="zh">立即安装</span></a>
+                <a class="btn alt" href="#token"><span class="en">See Token Benchmarks ↓</span><span class="zh">看 Token 实测 ↓</span></a>
+            </div>
         </div>
 
-        <div class="cta-row">
-            <a class="btn" href="#install"><span class="en">Install Now</span><span class="zh">立即安装</span></a>
-            <a class="btn alt" href="#token"><span class="en">See Token Benchmarks ↓</span><span class="zh">看 Token 实测 ↓</span></a>
+        <div class="hero-demo" aria-hidden="true">
+            <span class="sticker">⚡ <span class="en">live in 5.6s</span><span class="zh">5.6 秒上线</span></span>
+            <div class="win">
+                <div class="win-bar">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span class="win-title">talent-admin — localhost:8080</span>
+                </div>
+                <div class="win-body">
+                    <div class="side">
+                        <span class="mi"><span class="en">Dashboard</span><span class="zh">工作台</span></span>
+                        <span class="mi on"><span class="en">Candidates</span><span class="zh">候选人</span></span>
+                        <span class="mi"><span class="en">Interviews</span><span class="zh">面试安排</span></span>
+                        <span class="mi"><span class="en">Positions</span><span class="zh">职位管理</span></span>
+                        <span class="mi"><span class="en">Roles</span><span class="zh">权限角色</span></span>
+                    </div>
+                    <div class="main">
+                        <div class="tools">
+                            <span class="t-search"><span class="en">Search name / position…</span><span class="zh">搜索姓名 / 职位…</span></span>
+                            <span class="t-btn">+ <span class="en">New</span><span class="zh">新增</span></span>
+                            <span class="t-btn x">⇩ Excel</span>
+                        </div>
+                        <table class="grid-tbl">
+                            <thead>
+                                <tr><th><span class="en">NAME</span><span class="zh">姓名</span></th><th><span class="en">POSITION</span><span class="zh">职位</span></th><th><span class="en">STATUS</span><span class="zh">状态</span></th><th><span class="en">OPS</span><span class="zh">操作</span></th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><span class="en">A. Chen</span><span class="zh">陈一</span></td><td><span class="en">Backend</span><span class="zh">后端开发</span></td><td><span class="tag"><span class="en">Offer</span><span class="zh">已录用</span></span></td><td class="row-ops">✎ ✕</td></tr>
+                                <tr><td><span class="en">B. Wu</span><span class="zh">吴二</span></td><td><span class="en">Design</span><span class="zh">视觉设计</span></td><td><span class="tag warn"><span class="en">Pending</span><span class="zh">待面试</span></span></td><td class="row-ops">✎ ✕</td></tr>
+                                <tr><td><span class="en">C. Zhang</span><span class="zh">张三</span></td><td><span class="en">Game Ops</span><span class="zh">游戏运营</span></td><td><span class="tag"><span class="en">Offer</span><span class="zh">已录用</span></span></td><td class="row-ops">✎ ✕</td></tr>
+                                <tr><td><span class="en">D. Liu</span><span class="zh">刘四</span></td><td><span class="en">Frontend</span><span class="zh">前端开发</span></td><td><span class="tag stop"><span class="en">Rejected</span><span class="zh">已淘汰</span></span></td><td class="row-ops">✎ ✕</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="pager">
+                            <span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">›</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="works">
-            <span class="works-label"><span class="en">Turns into a panel:</span><span class="zh">都能变成后台：</span></span>
-            <span class="chip c1">VSCode</span>
-            <span class="chip c2"><span class="en">Recruiting</span><span class="zh">招聘</span></span>
-            <span class="chip c3">HR</span>
-            <span class="chip c4"><span class="en">Game Ops</span><span class="zh">游戏运营</span></span>
-            <span class="chip c5">CRM</span>
-            <span class="chip c1">Nginx</span>
-            <span class="chip c3"><span class="en">Anything…</span><span class="zh">任何系统…</span></span>
+    <div class="ticker" aria-hidden="true">
+        <div class="tk en">
+            <span>VSCode</span><span>Talent</span><span>HR</span><span>Game Ops</span><span>CRM</span><span>Inventory</span><span>Property Mgmt</span><span>Library</span><span>Clinic Booking</span><span>Fleet</span><span>School Admin</span><span>Restaurant</span><span>Membership</span><span>Order Mgmt</span><span>Warehouse</span><span>Device Ledger</span><span>Anything…</span>
+            <span>VSCode</span><span>Talent</span><span>HR</span><span>Game Ops</span><span>CRM</span><span>Inventory</span><span>Property Mgmt</span><span>Library</span><span>Clinic Booking</span><span>Fleet</span><span>School Admin</span><span>Restaurant</span><span>Membership</span><span>Order Mgmt</span><span>Warehouse</span><span>Device Ledger</span><span>Anything…</span>
+        </div>
+        <div class="tk zh">
+            <span>VSCode</span><span>招聘系统</span><span>HR 人事</span><span>游戏运营</span><span>CRM</span><span>进销存</span><span>物业管理</span><span>图书管理</span><span>诊所预约</span><span>车队管理</span><span>教务系统</span><span>餐饮点单</span><span>会员系统</span><span>订单管理</span><span>仓储管理</span><span>设备台账</span><span>任何系统…</span>
+            <span>VSCode</span><span>招聘系统</span><span>HR 人事</span><span>游戏运营</span><span>CRM</span><span>进销存</span><span>物业管理</span><span>图书管理</span><span>诊所预约</span><span>车队管理</span><span>教务系统</span><span>餐饮点单</span><span>会员系统</span><span>订单管理</span><span>仓储管理</span><span>设备台账</span><span>任何系统…</span>
         </div>
     </div>
 </header>
@@ -390,7 +533,7 @@ git clone https://github.com/erupts/erupt-skill.git ~/.claude/skills/erupt-admin
 const LINES = {
     en: [
         "Build an admin panel for my local VSCode",
-        "Create a recruiting system that tracks interview pipelines",
+        "Create a talent system that tracks interview pipelines",
         "An HR system: employees, departments, attendance, payroll",
         "A game ops console: players, items, redeem codes",
         "An Nginx site & certificate manager",
