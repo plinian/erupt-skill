@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>erupt-skill — One sentence turns any tool into an admin panel</title>
 <meta name="description" content="A Claude Code skill that generates a full data admin panel for any system from one sentence — VSCode, Nginx, HR, game ops, CRM… at 1/20 the tokens of writing it from scratch.">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -56,10 +57,10 @@ nav .wrap { display: flex; align-items: center; justify-content: space-between; 
 .logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-size: 21px; letter-spacing: -.5px; text-decoration: none; color: var(--ink); }
 .logo-mark {
     width: 30px; height: 30px; display: grid; place-items: center;
-    background: var(--ink); color: var(--yellow);
     border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
     transform: rotate(-5deg); transition: transform .2s ease;
 }
+.logo-mark img { display: block; width: 100%; height: 100%; }
 .logo:hover .logo-mark { transform: rotate(5deg) scale(1.08); }
 .logo-tag {
     font-family: var(--mono); font-weight: 800; font-size: 10px; letter-spacing: .08em;
@@ -317,7 +318,7 @@ footer a { color: var(--ink); }
 <nav>
     <div class="wrap">
         <a class="logo" href="#">
-            <span class="logo-mark"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M13 2 4 14h6l-2 8 9-12h-6l2-8z" fill="currentColor"/></svg></span>
+            <span class="logo-mark"><img src="icon.svg" alt="" width="30" height="30"></span>
             erupt<span class="logo-tag">SKILL</span>
         </a>
         <div class="links">
