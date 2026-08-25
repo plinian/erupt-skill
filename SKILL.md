@@ -9,20 +9,22 @@ description: 一句话生成数据管理后台。当用户描述想要一个管�
 
 ## 工作流程
 
-### 第 0 步：预下载运行环境（立即执行，不要等）
+### 第 0 步：预热运行环境与依赖（立即执行，不要等）
 
 收到需求后**第一时间**用后台方式执行：
 
 ```bash
-bash <skill目录>/scripts/setup-env.sh
+bash <skill目录>/scripts/warmup.sh
 ```
 
-这样在你解析需求、编写代码的同时，JDK 与 Maven 已在并行下载。环境说明：
+该脚本先准备 JDK/Maven 环境，再用模板项目跑一次真实构建，把 Spring Boot 与 erupt 依赖提前下载到 `~/.m2`——这样在你解析需求、编写代码的同时，依赖已在并行下载，用户项目首次构建基本免等待。环境说明：
 
 - 系统已有 JDK 17+ 和 Maven 时直接复用，秒级完成
 - 无系统 JDK 时使用 skill 内置的 **jlink 裁剪版 OpenJDK 25**（`vendor/jdk/`，基于 Azul Zulu 构建，含 mac arm64 与 windows x64，GPLv2 + Classpath Exception 协议，无授权问题，已实测覆盖编译、启动与 Excel 导入导出），解压到 `~/.erupt-skill/runtime` 即用，无需下载
 - 内置包无对应平台时（如 Linux）才在线下载：官方源失败自动切清华镜像；Maven 3.9 自动下载，依赖默认走阿里云镜像
 - `vendor/m2/`（不入 git）可选放置依赖种子（`scripts/build-m2-seed.sh` 生成），存在时首次构建完全免下载
+- 依赖预热按模板 pom 内容做缓存标记，重复调用秒级返回；预热失败不阻塞流程，`run.sh` 构建时会自动补齐
+- 预热进行中时 `run.sh` / `compile.sh` 会自动等待其完成（避免 Maven 本地仓库并发写入），无需人工协调
 
 ### 第 1 步：需求解析
 
@@ -67,8 +69,8 @@ bash <skill目录>/scripts/setup-env.sh
 bash <skill目录>/scripts/run.sh <项目目录> [端口]
 ```
 
-- 用后台方式运行此命令（构建首次需下载依赖，可能耗时数分钟）
-- 环境已在第 0 步预下载，此处直接复用；`ERUPT_SKILL_NO_MIRROR=1` 可关闭阿里云镜像
+- 用后台方式运行此命令（依赖已在第 0 步预热时基本就绪；若预热未完成会自动等待或补齐下载）
+- 环境已在第 0 步准备完毕，此处直接复用；`ERUPT_SKILL_NO_MIRROR=1` 可关闭阿里云镜像
 - 持续观察日志：出现 `Started Application` 即启动成功；出现编译错误则修复实体类后重启
 - 端口默认 8080，被占用时换端口重启（如 8081）
 
