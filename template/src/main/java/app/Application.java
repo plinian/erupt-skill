@@ -40,6 +40,8 @@ public class Application implements EruptModule {
         // menus.add(MetaMenu.createEruptClassMenu(Book.class, menus.get(0), 10));
         // 树形实体（@Erupt 带 tree 配置）需指定 TREE 类型：
         // menus.add(MetaMenu.createEruptClassMenu(Category.class, menus.get(0), 20, MenuTypeEnum.TREE));
+        // 自定义整页 TPL 页面（HTML 放 resources/tpl/ 下，value = 文件名，type 固定 "tpl"）：
+        // menus.add(MetaMenu.createSimpleMenu("dashboard", "数据大屏", "dashboard.html", menus.get(0), 5, "tpl"));
         return menus;
     }
 

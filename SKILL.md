@@ -95,6 +95,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 - 编译报错时根据错误信息修复（缺 import、注解属性写错、类型不匹配等），修到编译通过为止
 - 加字段 / 加实体：改代码 → 编译校验 → 重启（`generate-ddl: true` 会自动加列、建表）
 - 改外观（标题、Logo、主题色、样式）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置）和 `app.css`（自定义样式），无需改 Java 代码，重启后刷新页面生效
+- 自定义整页界面（仪表盘、数据大屏、任意自定义页面）：用 TPL——HTML 放 `src/main/resources/tpl/`，在 `initMenus()` 注册 type 为 `"tpl"` 的菜单即成为全页面菜单项，零 Java 代码，**必读 [reference/erupt-tpl.md](reference/erupt-tpl.md)**
 - 改字段类型 / 删字段：H2 不会自动删旧列，若启动报错，提示用户可删除项目 `data/` 目录重置数据后重启
 - 换数据库：MySQL 等生产库只需改 `application.yml` 的 datasource 并在 pom 加对应驱动
 
@@ -109,7 +110,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | DataProxy / Service 中查询数据库 | `reference/erupt-lambda-query.md` |
 | BI 报表、数据立方体（@EruptCube） | `reference/erupt-cube.md` |
 | 外部系统调用后台接口 | `reference/erupt-api.md` |
-| 自定义交互页面（TPL 模板） | `reference/erupt-tpl.md` |
+| 自定义前端页面：全页面菜单（仪表盘/大屏）、嵌入弹窗/视图（TPL 模板） | `reference/erupt-tpl.md` |
 
 **兜底**：遇到本地参考文档解决不了的问题（报错含义不明、不熟悉的注解属性、高级模块用法等），用 WebFetch 阅读 erupt 官方文档 https://docs.erupt.xyz 后再作答，不要凭猜测编写代码。
 
