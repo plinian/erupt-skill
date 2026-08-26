@@ -1,6 +1,6 @@
 # 开发可复用的 erupt 功能模块
 
-> 基于 erupt 2.1.0 实测核实。适用场景：要做的不是一个"应用"，而是一个可发布为 jar、任何 erupt 应用加依赖即用的**功能模块**（如 erupt-ai、erupt-job；完整范例见 erupt-wx）。与应用模式的区别：模块自带菜单注册、依赖用 provided、demo 放 test 源集。
+> 已对照 erupt 发布版实测核实（基线版本统一记录在 SKILL.md「版本基线」）。适用场景：要做的不是一个"应用"，而是一个可发布为 jar、任何 erupt 应用加依赖即用的**功能模块**（如 erupt-ai、erupt-job；完整范例见 erupt-wx）。与应用模式的区别：模块自带菜单注册、依赖用 provided、demo 放 test 源集。
 
 ## 项目骨架
 

@@ -58,6 +58,8 @@ bash <skill目录>/scripts/warmup.sh
    - **版本号必须来自上述命令的实际输出，严禁凭记忆或训练数据填写**（曾出现过误写 1.13.0 旧版本的情况）
    - artifact 固定为 `erupt-spring-boot-starter`，不要查 `erupt`、`erupt-core` 等其他 artifact
    - 阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；两源都失败时保留模板默认版本，不要阻塞生成流程
+
+   > **版本基线（唯一维护处）**：模板兜底版本在 `template/pom.xml` 的 `<erupt.version>`；`reference/` 各文档的实测核实基线为 **erupt 2.1.0（2026-08）**，升级基线时只改本行，reference 文档内不再各自写版本号。
 5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
 6. 在 `src/main/java/app/model/` 下编写实体类
 
