@@ -29,16 +29,13 @@ erupt-xxx/
 <parent>spring-boot-starter-parent</parent>   <!-- 与目标 erupt 版本的 Spring Boot 对齐 -->
 
 <dependencies>
-    <!-- erupt 依赖用 provided：宿主应用必然自带，避免版本冲突 -->
-    <dependency>
-        <groupId>xyz.erupt</groupId><artifactId>erupt-upms</artifactId>
-        <version>${erupt.version}</version><scope>provided</scope>
-    </dependency>
-    <!-- demo 依赖用 test：provided 依赖在 test classpath 可见，天然凑齐运行环境 -->
+    <!-- 只依赖 erupt-spring-boot-starter 即可（含 core/jpa/upms/security/web 完整前后端链路）
+         scope 用 provided：宿主应用必然自带，避免版本冲突，也不会把 erupt 传递给使用方 -->
     <dependency>
         <groupId>xyz.erupt</groupId><artifactId>erupt-spring-boot-starter</artifactId>
-        <version>${erupt.version}</version><scope>test</scope>
+        <version>${erupt.version}</version><scope>provided</scope>
     </dependency>
+    <!-- demo 只差数据库：provided 依赖在 test classpath 天然可见，无需重复声明 -->
     <dependency>
         <groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>test</scope>
     </dependency>
@@ -85,6 +82,44 @@ public class EruptXxxAutoConfiguration implements EruptModule {
 
 - `MenuStatus` 位于 `xyz.erupt.core.constant`
 - 宿主应用配置 `erupt.init-method-enum: every` 时每次启动幂等补插菜单
+
+## erupt 生态模块清单 —— 先复用，再造轮子
+
+**写任何功能前先对照此表：能加一个依赖解决的，不要手写实现**（如定时任务直接引 erupt-job，不要自己写 @Scheduled + 管理界面）。groupId 统一 `xyz.erupt`，版本与 erupt 保持一致。
+
+**starter 已自带（无需额外引入）**：
+
+| 模块 | 能力 |
+|---|---|
+| erupt-core | 注解引擎、CRUD、附件上传 |
+| erupt-data-jpa | ORM、EruptDao / lambdaQuery |
+| erupt-upms | 用户、角色、组织、菜单权限、操作日志、在线用户 |
+| erupt-security | 接口安全、防攻击 |
+| erupt-web | 管理端前端页面 |
+
+**按需引入的功能插件**：
+
+| artifactId | 能力 |
+|---|---|
+| erupt-job | 定时任务管理（可视化 cron、执行记录、任务处理器） |
+| erupt-report / erupt-cube | BI 报表、图表、数据立方体多维分析 |
+| erupt-designer | 可视化表单设计器 |
+| erupt-generator | erupt 代码生成 |
+| erupt-monitor | 系统监控（服务器/JVM/在线状态） |
+| erupt-magic-api | 在线 IDE，写脚本即发布动态接口 |
+| erupt-notice | 多渠道消息通知（站内信/邮件等渠道扩展） |
+| erupt-print | 单据打印模板 |
+| erupt-terminal | 网页版服务器终端 |
+| erupt-websocket | WebSocket 支持 |
+| erupt-tpl | 模板引擎，自定义页面/弹窗（详见 erupt-tpl.md） |
+| erupt-excel | Excel 导入导出增强 |
+| erupt-spring-boot-starter-all | 一键全家桶：starter + 上述常用插件 + AI |
+
+**AI 家族**：erupt-ai（LLM 接入与对话）、erupt-ai-rag（知识库 RAG）、erupt-ai-claw（自然语言直接操作后台）、erupt-ai-staff（数字员工）、erupt-ai-canvas（AI 生成视图页面）。
+
+**非 JPA 数据源适配**（给任意数据后端套上 erupt CRUD 界面）：erupt-data-mongodb / es / http / jdbc / ldap / redis / s3 / k8s / feishu / notion / file / memory。
+
+**微服务**：erupt-cloud-server（控制中心）+ erupt-cloud-node（业务节点）。
 
 ## 集成第三方服务的惯用模式（以多账号 SDK 为例）
 
