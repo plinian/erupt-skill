@@ -82,7 +82,13 @@ bash <skill目录>/scripts/run.sh <项目目录> [端口]
 > 账号 / 密码：erupt / erupt
 > 数据保存在项目 `data/` 目录下（H2 文件数据库），无需安装任何数据库
 
-如可用浏览器工具，可截图登录页验证。
+**交付前先跑 API 自检**（只读，不写数据）：登录 → 拉菜单 → 逐表查询，任何实体注解错误（联动表达式、权限配置等）都会在这一步暴露，而不是等用户点到才发现：
+
+```bash
+bash <skill目录>/scripts/verify.sh [端口]
+```
+
+输出 `PASS` 再交付；某张表报 ERROR 时按报错信息修复实体后重启复检。如可用浏览器工具，可再截图登录页确认。
 
 ### 第 5 步：迭代（用户继续一句话提需求）
 
@@ -111,8 +117,11 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | BI 报表、数据立方体（@EruptCube） | `reference/erupt-cube.md` |
 | 外部系统调用后台接口 | `reference/erupt-api.md` |
 | 自定义前端页面：全页面菜单（仪表盘/大屏）、嵌入弹窗/视图（TPL 模板） | `reference/erupt-tpl.md` |
+| 开发可复用 erupt 功能模块（发布为 jar 供其他 erupt 应用引入） | `reference/erupt-module.md` |
 
 **兜底**：遇到本地参考文档解决不了的问题（报错含义不明、不熟悉的注解属性、高级模块用法等），用 WebFetch 阅读 erupt 官方文档 https://docs.erupt.xyz 后再作答，不要凭猜测编写代码。
+
+**文档与实际冲突时以发布版为准**：reference 文档是人工维护的快照，可能落后于 erupt 新版本。当编译/运行结果与文档描述冲突时，以本地 Maven 仓库中发布版 jar 的实际内容为准（`unzip -l ~/.m2/repository/xyz/erupt/...jar | grep 类名` 核对包路径与类是否存在），不要对照 erupt 主仓库开发分支源码——开发版与发布版的 API 位置可能不同。使用不熟悉的注解组合（多 RowOperation、eruptClass 弹窗表单、@Dynamic 联动等）前，先在参考文档或发布版 jar 中核实用法再生成代码，一次写对远比编译报错后反复试错省时省 token。
 
 ## 常见问题排查
 
@@ -121,7 +130,10 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | 编译报找不到 `xyz.erupt` 包 | 依赖未下载完成，查看 Maven 日志；网络问题时确认阿里云镜像已生效 |
 | 端口占用 `Port 8080 was already in use` | 换端口：`run.sh <dir> 8081` |
 | 启动报 JPA 列类型冲突 | 实体字段类型变更导致，删除项目 `data/` 目录重启 |
-| Lombok 相关编译错误 | 确认实体类有 `@Getter @Setter`，不要手写 getter/setter |
+| 编译大量报 `cannot find symbol` getter/setter | JDK 23+ 默认禁用隐式注解处理，确认 pom 的 maven-compiler-plugin 已配置 lombok `annotationProcessorPaths`（模板已内置）；同时确认实体类有 `@Getter @Setter` |
+| 提交表单报 500 `ReferenceError: "xxx" is not defined` | `@Dynamic` 的 condition 用了字段名作变量，改为固定变量 `value` |
+| 启动报 `Primary key not found`（指向弹窗表单类） | `eruptClass` 表单类必须 `extends BaseModel` |
+| 多个自定义按钮点击后都执行同一个逻辑 | 多个 `@RowOperation` 必须各设唯一 `code`，空串会永远命中第一个 |
 | Windows 环境 | 脚本需在 Git Bash / MSYS 中运行（Claude Code on Windows 自带 Git Bash），内置 windows x64 JDK 可直接使用；脚本跑不通时可自装 [JDK 17](https://adoptium.net) 与 [Maven](https://maven.apache.org) 后直接 `mvn spring-boot:run` |
 
 ## 能力边界

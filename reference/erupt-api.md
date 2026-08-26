@@ -1,5 +1,7 @@
 # Erupt Core REST API 参考
 
+> 登录与数据接口已对照 erupt 2.1.0 实测核实（2026-08）。与实际冲突时以发布版为准。
+
 所有接口前缀 `/erupt-api`。
 
 ## 全局鉴权规则
@@ -9,7 +11,7 @@
 | 无需 Token 的接口 | 说明 |
 |-----------------|------|
 | `GET /erupt-api/version` | 版本号 |
-| `GET /erupt-api/login` | 登录获取 Token |
+| `POST /erupt-api/login` | 登录获取 Token |
 | `GET /erupt-api/code-img` | 验证码图片 |
 | `GET /erupt-api/open-api/create-token` | Open API 获取 Token |
 
@@ -496,16 +498,29 @@ power:           PowerObject         // 当前用户权限
 
 ### 方式一：普通用户登录（交互式）
 
-**`GET /erupt-api/login`**
+**`POST /erupt-api/login`**（JSON body，erupt 2.x 起为 POST）
 
-| 参数 | 必填 | 说明 |
+| 字段 | 必填 | 说明 |
 |-----|------|------|
 | `account` | ✓ | 用户账号 |
-| `pwd` | ✓ | 密码，默认需加密：`md5(md5(pwd) + 当月日期 + account)` |
+| `pwd` | ✓ | 密码，默认传输加密：**明文 URL 编码后做三次 Base64**（见下） |
 | `verifyCode` | — | 验证码（开启时必填） |
 | `verifyCodeMark` | — | 验证码标识 |
 
-> 密码加密可通过 `erupt-app.pwdTransferEncrypt=false` 关闭（不推荐生产环境）
+密码编码（`pwdTransferEncrypt` 默认开启，服务端执行三次 Base64 解码 + URL 解码）：
+
+```bash
+PWD3=$(python3 -c "
+import base64, urllib.parse
+s = urllib.parse.quote('erupt').encode()
+for _ in range(3): s = base64.b64encode(s)
+print(s.decode())")
+curl -s -X POST http://localhost:8080/erupt-api/login \
+  -H 'Content-Type: application/json' \
+  -d "{\"account\":\"erupt\",\"pwd\":\"$PWD3\"}"
+```
+
+> 传输加密可通过 `erupt-app.pwdTransferEncrypt=false` 关闭（不推荐生产环境），关闭后 `pwd` 传明文
 
 **Response: `LoginModel`**
 ```json

@@ -1,5 +1,7 @@
 # Erupt 注解开发助手
 
+> 关键注解行为已对照 erupt 2.1.0 发布版核实（2026-08）。与实际冲突时以发布版 jar 为准。
+
 你是 Erupt 低代码框架注解开发的专家。本项目使用 Java 注解驱动自动生成后台管理 UI，无需前端代码。
 
 聚焦 `@Erupt` 和 `@EruptField` 两个核心注解及其所有子注解，**忽略其他 API 和接口细节**。
@@ -67,7 +69,7 @@
 ```java
 @RowOperation(
     title = "按钮名",                             // 必填
-    code = "",                                    // 按钮标识码
+    code = "",                                    // 按钮标识码；同一实体有多个 RowOperation 时必须各自唯一（见下方警告）
     tip = "",                                     // 功能提示（hover 显示）
     callHint = "erupt.operation.call_hint",       // 调用前确认提示，空则不提示
     icon = "fa fa-dot-circle-o",                  // Font Awesome 图标
@@ -93,6 +95,10 @@
 **`RowOperation.Type` 枚举：**
 - `ERUPT` — 弹出 eruptClass 表单，operationHandler 处理逻辑
 - `TPL` — 自定义模板渲染（用 tpl 配置）
+
+> **⚠️ 同一实体定义多个 `@RowOperation` 时，必须为每个按钮设置唯一 `code`**（如 `code = "publish"`、`code = "sync"`）。后端按 `code` 精确匹配处理器，全部留默认空串时点任何按钮都会执行第一个按钮的 handler——不报错但行为错误。
+>
+> **⚠️ `eruptClass` 弹窗表单类必须继承 `xyz.erupt.jpa.model.BaseModel`**（普通 class 即可，不需要 @Entity），否则启动时报 `Primary key not found`。表单类照常用 @Erupt/@EruptField 注解定义字段。handler 中通过 `OperationHandler<行实体, 表单类>` 泛型第二个参数接收填写的表单值。
 
 ---
 
@@ -384,12 +390,14 @@
 
 ```java
 @Dynamic(
-    dependField = "type",          // 依赖的字段名（同一表单内）
-    condition = "type == 'VIP'",   // JS 表达式，变量为各字段名
-    match = Dynamic.Ctrl.SHOW,     // 满足时：SHOW/HIDE/NOTNULL/READONLY
-    noMatch = Dynamic.Ctrl.HIDE    // 不满足时
+    dependField = "type",           // 依赖的字段名（同一表单内）
+    condition = "value == 'VIP'",   // JS 表达式，变量固定为 value（即 dependField 字段的当前值）
+    match = Dynamic.Ctrl.SHOW,      // 满足时：SHOW/HIDE/NOTNULL/READONLY
+    noMatch = Dynamic.Ctrl.HIDE     // 不满足时
 )
 ```
+
+> **⚠️ condition 中的变量名固定是 `value`，不是字段名**。服务端提交校验时也会用脚本引擎执行该表达式（仅绑定 `value` 变量），写成字段名会在表单提交时报 500 `ReferenceError: "xxx" is not defined`。多值判断示例：`value === 'A' || value === 'B'`。
 
 #### `@ExprBool` — 动态布尔表达式
 
