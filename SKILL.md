@@ -59,7 +59,10 @@ bash <skill目录>/scripts/warmup.sh
    - artifact 固定为 `erupt-spring-boot-starter`，不要查 `erupt`、`erupt-core` 等其他 artifact
    - 阿里云查不到时换 `https://repo1.maven.org/maven2/...`（路径相同）；两源都失败时保留模板默认版本，不要阻塞生成流程
 
-   > **版本基线（唯一维护处）**：模板兜底版本在 `template/pom.xml` 的 `<erupt.version>`；`reference/` 各文档的实测核实基线为 **erupt 2.1.0（2026-08）**，升级基线时只改本行，reference 文档内不再各自写版本号。
+   > **版本基线（全部版本的唯一声明点，升级只改这些位置）**：
+   > - erupt 兜底版本：`template/pom.xml` 的 `<erupt.version>`（生成时自动查最新版覆盖）
+   > - Spring Boot 版本：`template/pom.xml` 的 `<parent>`（Maven 要求 parent 版本必须写死，此处即唯一声明，与 erupt 官方仓库使用的 Spring Boot 版本对齐）
+   > - `reference/` 各文档的实测核实基线：**erupt 2.1.0（2026-08）**，只记录在本行，reference 文档内不写版本号
 5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
 6. 在 `src/main/java/app/model/` 下编写实体类
 

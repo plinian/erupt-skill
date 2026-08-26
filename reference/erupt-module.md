@@ -99,20 +99,19 @@ public class EruptXxxAutoConfiguration implements EruptModule {
 
 **按需引入的功能插件**：
 
-| artifactId | 能力 |
-|---|---|
-| erupt-job | 定时任务管理（可视化 cron、执行记录、任务处理器） |
-| erupt-report / erupt-cube | BI 报表、图表、数据立方体多维分析 |
-| erupt-designer | 可视化表单设计器 |
-| erupt-generator | erupt 代码生成 |
-| erupt-monitor | 系统监控（服务器/JVM/在线状态） |
-| erupt-magic-api | 在线 IDE，写脚本即发布动态接口 |
-| erupt-notice | 多渠道消息通知（站内信/邮件等渠道扩展） |
-| erupt-print | 单据打印模板 |
-| erupt-terminal | 网页版服务器终端 |
-| erupt-websocket | WebSocket 支持 |
-| erupt-tpl | 模板引擎，自定义页面/弹窗（详见 erupt-tpl.md） |
-| erupt-excel | Excel 导入导出增强 |
+| artifactId                   | 能力 |
+|------------------------------|---|
+| erupt-job                    | 定时任务管理（可视化 cron、执行记录、任务处理器） |
+| erupt-report                 | BI 报表、图表 |
+| erupt-designer               | 可视化表单设计器 |
+| erupt-monitor                | 系统监控（服务器/JVM/在线状态） |
+| erupt-magic-api              | 在线 IDE，写脚本即发布动态接口 |
+| erupt-notice                 | 多渠道消息通知（站内信/邮件等渠道扩展） |
+| erupt-print                  | 单据打印模板 |
+| erupt-terminal               | 网页版服务器终端 |
+| erupt-websocket              | WebSocket 支持 |
+| erupt-tpl                    | 模板引擎，自定义页面/弹窗（详见 erupt-tpl.md） |
+| erupt-excel                  | Excel 导入导出增强 |
 | erupt-spring-boot-starter-all | 一键全家桶：starter + 上述常用插件 + AI |
 
 **AI 家族**：erupt-ai（LLM 接入与对话）、erupt-ai-rag（知识库 RAG）、erupt-ai-claw（自然语言直接操作后台）、erupt-ai-staff（数字员工）、erupt-ai-canvas（AI 生成视图页面）。
