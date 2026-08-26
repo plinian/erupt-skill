@@ -1,6 +1,6 @@
 ---
 name: erupt-admin
-description: 一句话生成数据管理后台。当用户描述想要一个管理系统、后台、CRUD 系统、信息管理平台（如"生成一个图书管理后台"、"做一个客户管理系统"），或要求为已生成的 erupt 项目增改功能时使用。基于 erupt 低代码框架，自动准备 JDK/Maven 环境，非开发人员也可直接使用。
+description: 一句话生成数据管理后台。当用户描述想要一个管理系统、后台、CRUD 系统、信息管理平台（如"生成一个图书管理后台"、"做一个客户管理系统"），或要求为已生成的 erupt 项目增改功能时使用。Generate a full admin backend from one sentence — use when the user asks for an admin panel, CRUD system, management system, or dashboard backend (e.g. "build me a library admin system"), or iterates on a generated erupt project. 基于 erupt 低代码框架，自动准备 JDK/Maven 环境，非开发人员也可直接使用。
 ---
 
 # erupt 一句话生成数据管理后台
