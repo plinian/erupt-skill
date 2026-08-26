@@ -38,8 +38,7 @@ bash <skill目录>/scripts/warmup.sh
 
 ### 第 2 步：生成项目
 
-1. 项目名用英文 kebab-case（如 `library-admin`），在用户当前目录下创建
-2. 复制本 skill 的 `template/` 目录到项目目录
+> **模板分流**：本 skill 的默认场景是生成**应用**（管理后台），一律复制 `template/`。仅当用户**明确提出**要开发可复用的 erupt 功能模块/扩展/插件（产出是 jar，给其他 erupt 应用加依赖使用，如"做一个 erupt-xx 模块"）时，才改用 `template-module/`，流程见 `reference/erupt-module.md`。拿不准时按应用处理，**不要**因为需求里出现"模块"二字（如"用户模块""订单模块"，那只是业务功能）就选 template-module。
 3. 将模板中**所有文件**的 `__ARTIFACT_ID__` 全部替换为项目名（涉及 `pom.xml`、`application.yml`、`Application.java` 三处，建议全局搜索确认无遗漏）
 4. **erupt 版本尽量用最新**：查询 Maven 仓库版本列表，取语义化排序最大的正式版，更新 pom.xml 的 `<erupt.version>`：
 
