@@ -54,7 +54,6 @@ scripts/run.sh              # one-command build and start
 scripts/build-m2-seed.sh    # optional: build a local dependency seed into vendor/m2 for fully-offline first builds
 scripts/build-jdk.sh        # maintainer: jlink-build the minimized JDK runtimes in vendor/jdk
 vendor/jdk/                 # bundled jlink-minimized OpenJDK 25 (mac arm64 / windows x64; Linux downloads automatically)
-vendor/m2/                  # optional local dependency seed (git-ignored)
 ```
 
 ## Requirements
