@@ -1,6 +1,6 @@
 ---
 name: erupt-admin
-description: 一句话生成数据管理后台。当用户描述想要一个管理系统、后台、CRUD 系统、信息管理平台（如"生成一个图书管理后台"、"做一个客户管理系统"），或要求为已生成的 erupt 项目增改功能时使用。Generate a full admin backend from one sentence — use when the user asks for an admin panel, CRUD system, management system, or dashboard backend (e.g. "build me a library admin system"), or iterates on a generated erupt project. 基于 erupt 低代码框架，自动准备 JDK/Maven 环境，非开发人员也可直接使用。
+description: 一句话生成数据管理后台。当用户描述想要一个管理系统、后台、CRUD 系统、信息管理平台，或各类业务系统如 CRM（客户管理）、ERP、OA、进销存、库存管理（WMS）、订单管理（OMS）、会员管理、人事管理（HR）、CMS 内容管理、工单系统、报名/预约系统（如"生成一个图书管理后台"、"做一个 CRM"、"搭个进销存"），或要求为已生成的 erupt 项目增改功能时使用。Generate a full admin backend from one sentence — use when the user asks for an admin panel, CRUD app, management system, dashboard backend, internal tool, or business systems like CRM, ERP, OA, inventory/warehouse (WMS), order management (OMS), membership, HR, CMS, ticketing, or booking systems (e.g. "build me a library admin system", "build a simple CRM"), or iterates on a generated erupt project. 基于 erupt 低代码框架，自动准备 JDK/Maven 环境，非开发人员也可直接使用。
 ---
 
 # erupt 一句话生成数据管理后台
@@ -39,6 +39,9 @@ bash <skill目录>/scripts/warmup.sh
 ### 第 2 步：生成项目
 
 > **模板分流**：本 skill 的默认场景是生成**应用**（管理后台），一律复制 `template/`。仅当用户**明确提出**要开发可复用的 erupt 功能模块/扩展/插件（产出是 jar，给其他 erupt 应用加依赖使用，如"做一个 erupt-xx 模块"）时，才改用 `template-module/`，流程见 `reference/erupt-module.md`。拿不准时按应用处理，**不要**因为需求里出现"模块"二字（如"用户模块""订单模块"，那只是业务功能）就选 template-module。
+
+1. 项目名用英文 kebab-case（如 `library-admin`），在用户当前目录下创建
+2. 复制本 skill 的 `template/` 目录到项目目录
 3. 将模板中**所有文件**的 `__ARTIFACT_ID__` 全部替换为项目名（涉及 `pom.xml`、`application.yml`、`Application.java` 三处，建议全局搜索确认无遗漏）
 4. **erupt 版本尽量用最新**：查询 Maven 仓库版本列表，取语义化排序最大的正式版，更新 pom.xml 的 `<erupt.version>`：
 
@@ -126,7 +129,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 **兜底**：遇到本地参考文档解决不了的问题（报错含义不明、不熟悉的注解属性、高级模块用法等），用 WebFetch 阅读 erupt 官方文档 https://docs.erupt.xyz 后再作答，不要凭猜测编写代码。
 
-**文档与实际冲突时以发布版为准**：reference 文档是人工维护的快照，可能落后于 erupt 新版本。当编译/运行结果与文档描述冲突时，以本地 Maven 仓库中发布版 jar 的实际内容为准（`unzip -l ~/.m2/repository/xyz/erupt/...jar | grep 类名` 核对包路径与类是否存在），不要对照 erupt 主仓库开发分支源码——开发版与发布版的 API 位置可能不同。使用不熟悉的注解组合（多 RowOperation、eruptClass 弹窗表单、@Dynamic 联动等）前，先在参考文档或发布版 jar 中核实用法再生成代码，一次写对远比编译报错后反复试错省时省 token。
+**文档与实际冲突时以发布版为准**：reference 文档是人工维护的快照，可能落后于 erupt 新版本。当编译/运行结果与文档描述冲突时，以发布版 jar 的实际内容为准，不要对照 erupt 主仓库开发分支源码——开发版与发布版的 API 位置可能不同。使用不熟悉的注解组合（多 RowOperation、eruptClass 弹窗表单、@Dynamic 联动等）前，先在参考文档或发布版 jar 中核实用法再生成代码，一次写对远比编译报错后反复试错省时省 token。
 
 ## 常见问题排查
 
