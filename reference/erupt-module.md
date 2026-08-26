@@ -32,24 +32,36 @@ erupt-xxx/
     <!-- 只依赖 erupt-spring-boot-starter 即可（含 core/jpa/upms/security/web 完整前后端链路）
          scope 用 provided：宿主应用必然自带，避免版本冲突，也不会把 erupt 传递给使用方 -->
     <dependency>
-        <groupId>xyz.erupt</groupId><artifactId>erupt-spring-boot-starter</artifactId>
-        <version>${erupt.version}</version><scope>provided</scope>
+        <groupId>xyz.erupt</groupId>
+        <artifactId>erupt-spring-boot-starter</artifactId>
+        <version>${erupt.version}</version>
+        <scope>provided</scope>
     </dependency>
-    <!-- demo 只差数据库：provided 依赖在 test classpath 天然可见，无需重复声明 -->
+    <!-- 默认内置 H2 开箱即用（runtime 会传递给宿主应用，宿主零配置即可起库）；
+         生产换 MySQL 等只需改 datasource，H2 留在 classpath 无冲突。demo 同样复用它 -->
     <dependency>
-        <groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>test</scope>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
     </dependency>
 </dependencies>
 
-<build><plugins>
+<build>
+<plugins>
     <!-- lombok 处理器显式声明（JDK 23+ 必需），同应用模板 -->
     <!-- 库工程禁用 repackage，spring-boot 插件仅用于 test-run -->
     <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions><execution><id>repackage</id><phase>none</phase></execution></executions>
+        <executions>
+            <execution>
+                <id>repackage</id>
+                <phase>none</phase>
+             </execution>
+        </executions>
     </plugin>
-</plugins></build>
+</plugins>
+</build>
 ```
 
 demo 启动：`mvn spring-boot:test-run`（Spring Boot 3.1+，自动发现 test 源集里的 @SpringBootApplication）。
