@@ -1,105 +1,31 @@
 # 开发可复用的 erupt 功能模块
 
-> 已对照 erupt 发布版实测核实（基线版本统一记录在 SKILL.md「版本基线」）。适用场景：要做的不是一个"应用"，而是可发布为 jar、任何 erupt 应用加依赖即用的**功能模块**（如 erupt-ai、erupt-job；完整可运行范例见 erupt-wx 仓库）。
+> 已对照 erupt 发布版实测核实（基线版本统一记录在 SKILL.md「版本基线」）。适用场景：要做的不是一个"应用"，而是可发布为 jar、任何 erupt 应用加依赖即用的**功能模块**（如 erupt-ai、erupt-job；完整实战范例见 erupt-wx 仓库）。
 
-## 与应用（template/）的关系：同一套机制，只差打包形态
+## 生成方式：复制 template-module/
 
-实体注解、DataProxy、`EruptModule` + `initMenus()` 菜单注册、H2 默认库——模块与应用**完全一样**，template 应用里的一切写法可直接沿用。差异只有三处：
+模块脚手架是真实可编译的工程文件，**所有 pom 与代码以 `template-module/` 目录为唯一事实源**，本文档不重复贴代码：
 
-| | 应用（template/） | 功能模块 |
+1. 复制本 skill 的 `template-module/` 到目标目录
+2. 全局替换三个占位符：
+   - `__GROUP_ID__` → Maven groupId（不发布可用 `app`）
+   - `__ARTIFACT_ID__` → 模块名 kebab-case（如 `erupt-wx`），涉及 `pom.xml` 与 `application.yml`
+   - `modtpl` → 模块包名（纯小写，如 `wx`），**同时重命名 `src/main/java/modtpl`、`src/test/java/modtpl` 两个目录**，并同步 `META-INF/spring/...AutoConfiguration.imports` 里的类全名
+3. 在包下写 `@Erupt` 实体、DataProxy、Handler——**写法与应用完全一致**，遵循 annotations.md / erupt-model.md，菜单在 `ModuleAutoConfiguration.initMenus()` 注册（文件内已附各种菜单类型的注释示例）
+4. 启动 demo：`mvn spring-boot:test-run`（demo 启动类在 test 源集，不进 jar），完成后跑 `scripts/verify.sh` 自检
+5. erupt 版本：脚手架 pom 的 `<erupt.version>` 为兜底值，按 SKILL.md 第 2 步的版本查询逻辑更新为最新 release
+
+## 与应用（template/）的差异，仅三处
+
+实体注解、DataProxy、`EruptModule` + `initMenus()`、H2 默认库等机制**与应用完全相同**。差异只在打包形态（已内置于 template-module，无需手工调整）：
+
+| | 应用（template/） | 功能模块（template-module/） |
 |---|---|---|
-| erupt 依赖 scope | compile（默认） | **provided**（宿主必然自带，不向使用方传递） |
-| spring-boot-maven-plugin | 默认 repackage，打可执行 jar | **禁用 repackage**，打普通库 jar |
-| 入口注册 | `@SpringBootApplication` 启动类自身实现 EruptModule | 入口类写进 **AutoConfiguration.imports**，由宿主自动装配 |
+| erupt 依赖 scope | compile（默认） | provided（宿主必然自带，不向使用方传递） |
+| spring-boot-maven-plugin | 默认 repackage，可执行 jar | 禁用 repackage，普通库 jar |
+| 入口注册 | 启动类自身实现 EruptModule | 入口类写进 AutoConfiguration.imports，宿主自动装配 |
 
-> ⚠️ 反向同样成立：给用户生成**普通应用**时严禁套用本文的 provided / 禁 repackage，否则应用运行时缺 erupt 依赖、也打不出可执行 jar。应用一律照 template/ 原样。
-
-## 项目骨架
-
-```
-erupt-xxx/
-├── pom.xml
-└── src/
-    ├── main/
-    │   ├── java/xyz/erupt/xxx/
-    │   │   ├── EruptXxxAutoConfiguration.java   # 模块入口：EruptModule + 菜单注册
-    │   │   ├── config/                          # @ConfigurationProperties("erupt.xxx")
-    │   │   ├── model/                           # @Erupt 实体 + 弹窗表单类
-    │   │   ├── proxy/                           # DataProxy 实现
-    │   │   ├── handler/                         # OperationHandler / ChoiceFetchHandler
-    │   │   └── controller/                      # 自定义 REST（可选）
-    │   └── resources/META-INF/spring/
-    │       └── org.springframework.boot.autoconfigure.AutoConfiguration.imports  # 一行：入口类全名
-    └── test/
-        ├── java/.../demo/XxxDemoApplication.java   # demo 启动类（不进 jar），普通
-        │                                           # @SpringBootApplication + @EruptScan + @EntityScan，同 template
-        └── resources/application.yml               # H2 配置，同 template
-```
-
-## pom：在 template/pom.xml 基础上只改两处
-
-properties（erupt.version 等）、lombok 依赖与 maven-compiler-plugin 的 annotationProcessorPaths、H2（runtime）**全部与 template/pom.xml 保持一致，直接复制，不要重新发明**。仅以下两处不同：
-
-```xml
-<!-- 差异 1：erupt 依赖加 provided（starter 含 core/jpa/upms/security/web 完整前后端链路） -->
-<dependency>
-    <groupId>xyz.erupt</groupId>
-    <artifactId>erupt-spring-boot-starter</artifactId>
-    <version>${erupt.version}</version>
-    <scope>provided</scope>
-</dependency>
-
-<!-- 差异 2：禁用 repackage 打库 jar（插件保留，spring-boot:test-run 跑 demo 仍需要它） -->
-<plugin>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-maven-plugin</artifactId>
-    <executions>
-        <execution>
-            <id>repackage</id>
-            <phase>none</phase>
-        </execution>
-    </executions>
-</plugin>
-```
-
-第三处差异不在 pom：新增 `AutoConfiguration.imports` 文件（见下节）。
-
-demo 启动：`mvn spring-boot:test-run`（Spring Boot 3.1+，自动发现 test 源集里的 @SpringBootApplication；provided 与 runtime 依赖在 test classpath 均可见，demo 无需额外依赖）。
-
-## 模块入口类
-
-与 template 的 `Application.java` 是**同一机制**（实现 EruptModule + initMenus），仅两点不同：去掉 `main` 方法与 `@SpringBootApplication` 改为 `@Configuration`；并在 `resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 中写一行入口类全名，由宿主应用自动装配。
-
-```java
-@Configuration
-@ComponentScan
-@EruptScan        // 扫描本包 @Erupt 类
-@EntityScan       // 扫描本包 JPA 实体
-public class EruptXxxAutoConfiguration implements EruptModule {
-
-    static { EruptModuleInvoke.addEruptModule(EruptXxxAutoConfiguration.class); }
-
-    @Override
-    public ModuleInfo info() { return ModuleInfo.builder().name("erupt-xxx").build(); }
-
-    @Override
-    public List<MetaMenu> initMenus() {
-        List<MetaMenu> menus = new ArrayList<>();
-        menus.add(MetaMenu.createRootMenu("$xxx", "模块名", "fa fa-cube", 30));
-        menus.add(MetaMenu.createEruptClassMenu(MyEntity.class, menus.get(0), 10));
-        // 树形实体（@Erupt 带 tree 配置）需指定 TREE 类型，同 template：
-        // menus.add(MetaMenu.createEruptClassMenu(MyTree.class, menus.get(0), 15, MenuTypeEnum.TREE));
-        // 自定义整页 TPL 页面，同 template：
-        // menus.add(MetaMenu.createSimpleMenu("dashboard", "数据大屏", "dashboard.html", menus.get(0), 5, "tpl"));
-        // 隐藏菜单（如仅供 Drill 下钻的页面）：注册以获得权限，但不显示
-        menus.add(MetaMenu.createEruptClassMenu(MyLog.class, menus.get(0), 20, MenuStatus.HIDE));
-        return menus;
-    }
-}
-```
-
-- `MenuStatus`、`MenuTypeEnum` 均位于 `xyz.erupt.core.constant`
-- 宿主应用配置 `erupt.init-method-enum: every` 时每次启动幂等补插菜单
+> ⚠️ 给用户生成**普通应用**时用 template/，严禁套用模块的 provided / 禁 repackage，否则应用运行时缺 erupt 依赖、也打不出可执行 jar。
 
 ## erupt 生态模块清单 —— 先复用，再造轮子
 

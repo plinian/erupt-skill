@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./h2/__ARTIFACT_ID__;AUTO_SERVER=TRUE;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    show-sql: false
+    generate-ddl: true
+    database: h2
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+
+server:
+  port: 8080
+
+erupt:
+  init-method-enum: every
+  upms:
+    default-account: erupt
+    default-password: erupt

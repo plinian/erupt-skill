@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot 版本唯一声明处（parent 版本 Maven 不支持 property），与 template/pom.xml 保持一致 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.16</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>__GROUP_ID__</groupId>
+    <artifactId>__ARTIFACT_ID__</artifactId>
+    <version>1.0.0</version>
+    <name>__ARTIFACT_ID__</name>
+
+    <properties>
+        <java.version>17</java.version>
+        <!-- 生成时自动更新为 Maven 仓库最新 release，此处为查询失败时的兜底版本 -->
+        <erupt.version>2.1.0</erupt.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- 与应用模板差异 1：erupt 依赖用 provided（宿主应用必然自带，不向使用方传递）
+             starter 含 core/jpa/upms/security/web 完整前后端链路，无需引入其他 erupt 依赖 -->
+        <dependency>
+            <groupId>xyz.erupt</groupId>
+            <artifactId>erupt-spring-boot-starter</artifactId>
+            <version>${erupt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- 默认内置 H2 开箱即用（runtime 会传递给宿主应用，零配置即可起库）；生产换 MySQL 只需改 datasource -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- JDK 23+ 默认禁用 classpath 隐式注解处理，必须显式声明 lombok 处理器，否则 @Getter/@Setter 不生效 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- 与应用模板差异 2：禁用 repackage 打普通库 jar（插件保留，spring-boot:test-run 跑 demo 仍需要） -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
