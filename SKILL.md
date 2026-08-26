@@ -121,6 +121,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | BI 报表、数据立方体（@EruptCube） | `reference/erupt-cube.md` |
 | 外部系统调用后台接口 | `reference/erupt-api.md` |
 | 自定义前端页面：全页面菜单（仪表盘/大屏）、嵌入弹窗/视图（TPL 模板） | `reference/erupt-tpl.md` |
+| 定时任务、报表、消息通知、监控、打印、AI 对话、非 JPA 数据源等**现成能力** | **先查 `reference/erupt-ecosystem.md`，加依赖复用，不要手写实现** |
 | 开发可复用 erupt 功能模块（发布为 jar 供其他 erupt 应用引入） | `reference/erupt-module.md` |
 
 **兜底**：遇到本地参考文档解决不了的问题（报错含义不明、不熟悉的注解属性、高级模块用法等），用 WebFetch 阅读 erupt 官方文档 https://docs.erupt.xyz 后再作答，不要凭猜测编写代码。
@@ -142,5 +143,5 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 ## 能力边界
 
-- 本 skill 覆盖 erupt 核心 CRUD 能力；工作流（erupt-flow）、BI 报表（erupt-cube）、微服务等高级模块不在默认模板中，用户需要时再引入对应依赖
+- 本 skill 覆盖 erupt 核心 CRUD 能力；定时任务、报表、通知、AI、微服务等能力不在默认模板中，需要时按 `reference/erupt-ecosystem.md` 清单加依赖引入，不要手写实现
 - 默认使用 H2 内嵌数据库，适合演示与轻量使用；正式生产建议切换 MySQL/PostgreSQL

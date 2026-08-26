@@ -27,41 +27,9 @@
 
 > ⚠️ 给用户生成**普通应用**时用 template/，严禁套用模块的 provided / 禁 repackage，否则应用运行时缺 erupt 依赖、也打不出可执行 jar。
 
-## erupt 生态模块清单 —— 先复用，再造轮子
+## 动手前先查生态
 
-**写任何功能前先对照此表：能加一个依赖解决的，不要手写实现**（如定时任务直接引 erupt-job，不要自己写 @Scheduled + 管理界面）。groupId 统一 `xyz.erupt`，版本与 erupt 保持一致。
-
-**starter 已自带（无需额外引入）**：
-
-| 模块 | 能力 |
-|---|---|
-| erupt-core | 注解引擎、CRUD、附件上传 |
-| erupt-data-jpa | ORM、EruptDao / lambdaQuery |
-| erupt-upms | 用户、角色、组织、菜单权限、操作日志、在线用户 |
-| erupt-security | 接口安全、防攻击 |
-| erupt-web | 管理端前端页面 |
-
-**按需引入的功能插件**：
-
-| artifactId                   | 能力 |
-|------------------------------|---|
-| erupt-job                    | 定时任务管理（可视化 cron、执行记录、任务处理器） |
-| erupt-report                 | BI 报表、图表 |
-| erupt-designer               | 可视化表单设计器 |
-| erupt-monitor                | 系统监控（服务器/JVM/在线状态） |
-| erupt-magic-api              | 在线 IDE，写脚本即发布动态接口 |
-| erupt-notice                 | 多渠道消息通知（站内信/邮件等渠道扩展） |
-| erupt-print                  | 单据打印模板 |
-| erupt-terminal               | 网页版服务器终端 |
-| erupt-websocket              | WebSocket 支持 |
-| erupt-tpl                    | 模板引擎，自定义页面/弹窗（详见 erupt-tpl.md） |
-| erupt-spring-boot-starter-all | 一键全家桶：starter + 上述常用插件 + AI |
-
-**AI 家族**：erupt-ai（LLM 接入与对话）、erupt-ai-rag（知识库 RAG）、erupt-ai-claw（自然语言直接操作后台）、erupt-ai-staff（数字员工）、erupt-ai-canvas（AI 生成视图页面）。
-
-**非 JPA 数据源适配**（给任意数据后端套上 erupt CRUD 界面）：erupt-data-mongodb / es / http / jdbc / ldap / redis / s3 / k8s / feishu / notion / file / memory。
-
-**微服务**：erupt-cloud-server（控制中心）+ erupt-cloud-node（业务节点）。
+开发新模块前先读 [erupt-ecosystem.md](erupt-ecosystem.md)：要做的能力若已有现成模块（定时任务、报表、通知……），直接复用或在其上扩展，不要重复造轮子。
 
 ## 集成第三方服务的惯用模式（以多账号 SDK 为例）
 
