@@ -233,19 +233,13 @@ public class SiteConfigProxy implements DataProxy<SiteConfig> {
 ```
 
 ```java
-// 3. 菜单注册：FORM 类型 + 手动补 ADD/EDIT 功能权限（必须！）
-MetaMenu formMenu = MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, MenuTypeEnum.FORM);
-menus.add(formMenu);
-// UPMS 只为 TABLE/TREE 菜单自动生成功能权限按钮，FORM 菜单必须手动补，
-// 否则打开/保存表单时报 "Insufficient permissions"
-menus.add(MetaMenu.createSimpleMenu("SiteConfig@ADD", "新增", "SiteConfig@ADD", formMenu, 10, MenuTypeEnum.BUTTON.getCode()));
-menus.add(MetaMenu.createSimpleMenu("SiteConfig@EDIT", "修改", "SiteConfig@EDIT", formMenu, 20, MenuTypeEnum.BUTTON.getCode()));
+// 3. 菜单注册：FORM 类型（ADD/EDIT 权限按钮与 TABLE/TREE 一样按 @Power 自动生成）
+menus.add(MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, MenuTypeEnum.FORM));
 ```
 
 要点：
 - FORM 视图字段只需写 `edit`，不需要 `views`（没有列表页）
-- **必须手动注册 `实体名@ADD` 和 `实体名@EDIT` 两个 BUTTON 权限菜单**（见上），这是 FORM 类型最常见的坑
-- 不要用 `authVerify = false` 图省事：它会整个跳过权限校验，任何登录用户（无论角色）都能访问该功能，脱离 RBAC 管控
+- 不要用 `authVerify = false` 绕权限：它会整个跳过权限校验，任何登录用户（无论角色）都能访问该功能，脱离 RBAC 管控
 - 数据来源不限于数据库：`formViewBehavior`/`formSave` 里也可以读写文件、调外部 API
 - 保存前会正常执行字段校验（notNull、正则等）；`formSave` 里抛 `xyz.erupt.annotation.exception.EruptException` 可中止保存并向用户提示
 
