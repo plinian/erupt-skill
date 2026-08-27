@@ -129,8 +129,11 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | 自定义前端页面：全页面菜单（仪表盘/大屏）、嵌入弹窗/视图（TPL 模板） | `reference/erupt-tpl.md` |
 | 定时任务、报表、消息通知、监控、打印、AI 对话、非 JPA 数据源等**现成能力** | **先查 `reference/erupt-ecosystem.md`，加依赖复用，不要手写实现** |
 | 开发可复用 erupt 功能模块（发布为 jar 供其他 erupt 应用引入） | `reference/erupt-module.md` |
+| 需要注解全量属性、完整示例、上表未覆盖的能力细节 | `reference/doc-map.md`（官方文档地图，随 erupt 版本更新的单一事实源） |
 
-**兜底**：遇到本地参考文档解决不了的问题（报错含义不明、不熟悉的注解属性、高级模块用法等），用 WebFetch 阅读 erupt 官方文档 https://docs.erupt.xyz 后再作答，不要凭猜测编写代码。
+本地 reference 只保留**决策规则**与**实测坑**（官方文档没有的），API 细节一律走官方文档。
+
+**兜底**：本地参考文档解决不了时（报错含义不明、不熟悉的注解属性、高级模块用法等），按 `reference/doc-map.md` 找到对应主题，用 WebFetch 拉取 GitHub raw markdown 阅读后再作答，不要凭猜测编写代码。**注意：官网 https://docs.erupt.xyz 是 JS 渲染，WebFetch 抓不到正文，必须走 doc-map 里的 `raw.githubusercontent.com/.../en/*.md` 地址。**
 
 **文档与实际冲突时以发布版为准**：reference 文档是人工维护的快照，可能落后于 erupt 新版本。当编译/运行结果与文档描述冲突时，以发布版 jar 的实际内容为准，不要对照 erupt 主仓库开发分支源码——开发版与发布版的 API 位置可能不同。使用不熟悉的注解组合（多 RowOperation、eruptClass 弹窗表单、@Dynamic 联动等）前，先在参考文档或发布版 jar 中核实用法再生成代码，一次写对远比编译报错后反复试错省时省 token。
 

@@ -42,51 +42,15 @@ erupt-ai（LLM 接入与对话）、erupt-ai-rag（知识库 RAG）、erupt-ai-c
 
 erupt-cloud-server（控制中心）+ erupt-cloud-node（业务节点）。
 
-## 常用模块的代码用法（引入依赖后怎么写）
+## 引入依赖后怎么写代码
 
-### erupt-job：定时任务处理器
+需要写代码接入的模块，入口类与用法见 doc-map.md 对应页：
 
-实现接口注册为 Bean 即可在管理界面「任务配置」中选到该处理器，cron/参数/通知全部界面配置，改配置不用重启：
+| 模块 | 你要写什么 | 文档（doc-map 相对路径） |
+|---|---|---|
+| erupt-job | 实现 `EruptJobHandler`（`xyz.erupt.job.handler`）注册为 Bean，cron/参数界面配置 | `modules/erupt-job` |
+| erupt-notice | 注入 `EruptNoticeService.send(...)` 发消息；继承 `AbstractNoticeChannel` 扩展渠道 | `modules/erupt-notice` |
+| erupt-websocket | 注入 `EruptWebSocketService`（`sendJsNotify`/`sendJsMessage`）推送前端 | `modules/erupt-websocket` |
+| erupt-http/jdbc/file | 数据源注解，见 erupt-datasource.md | `modules/erupt-http` 等 |
 
-```java
-@Component
-public class ReportJobHandler implements EruptJobHandler {   // xyz.erupt.job.handler.EruptJobHandler
-
-    @Override
-    public String exec(String code, String param) {          // param 为界面配置的参数（通常 JSON）
-        return "生成报表 " + count + " 份";                    // 返回值记入执行日志
-    }
-
-    // 可选：name() 显示名 / cron() 默认表达式 / success(result,param) / error(throwable,param) 回调
-}
-```
-
-### erupt-notice：发送消息通知
-
-```java
-@Resource
-private EruptNoticeService eruptNoticeService;   // xyz.erupt.notice.service.EruptNoticeService
-
-NoticeMessage msg = new NoticeMessage();
-msg.setTitle("订单已发货");
-msg.setContent("订单 #12345 已发货");
-eruptNoticeService.send(new EruptInternalNotice(), "order_shipped", List.of(userId), msg);
-// "order_shipped" 为通知场景 code，需先在后台「通知场景」菜单创建
-```
-
-自定义渠道（邮件/短信/钉钉）：继承 `AbstractNoticeChannel`，实现 `name()` 与 `send(EruptUser receiveUser, NoticeMessage msg)`，注册为 @Component 即出现在渠道列表。
-
-### erupt-websocket：后端推送前端
-
-```java
-@Resource
-private EruptWebSocketService eruptWebSocketService;   // xyz.erupt.webscoket.service.EruptWebSocketService
-
-eruptWebSocketService.sendJsNotify("任务完成", "报表已生成");        // 所有在线用户弹通知
-eruptWebSocketService.sendJsMessage("数据已刷新");                  // 轻提示
-// 精确推送：getAllSession() 拿会话后 send(session, SocketCommand.JS, "任意 JS")
-```
-
-### 零代码模块
-
-erupt-monitor / erupt-magic-api / erupt-designer / erupt-terminal / erupt-report / erupt-print：加依赖重启即出现对应菜单，纯界面操作，无需写代码（report/print 的高级 handler 扩展见各模块源码）。
+**零代码模块**（加依赖重启即出现菜单，纯界面操作）：erupt-monitor / erupt-magic-api / erupt-designer / erupt-terminal / erupt-report / erupt-print。
