@@ -178,8 +178,8 @@ public class Category extends BaseModel {
 FORM 视图**不自动读写数据库**，加载与保存全部由 DataProxy 钩子完成：
 
 ```java
-// 1. 实体：正常写 @EruptField，挂上 dataProxy；authVerify = false 免功能权限校验（FORM 必加，见下方要点）
-@Erupt(name = "系统设置", authVerify = false, dataProxy = SiteConfigProxy.class)
+// 1. 实体：正常写 @EruptField，并挂上 dataProxy
+@Erupt(name = "系统设置", dataProxy = SiteConfigProxy.class)
 @Table(name = "t_site_config")
 @Entity
 @Getter
@@ -233,13 +233,19 @@ public class SiteConfigProxy implements DataProxy<SiteConfig> {
 ```
 
 ```java
-// 3. 菜单注册：FORM 类型
-menus.add(MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, MenuTypeEnum.FORM));
+// 3. 菜单注册：FORM 类型 + 手动补 ADD/EDIT 功能权限（必须！）
+MetaMenu formMenu = MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, MenuTypeEnum.FORM);
+menus.add(formMenu);
+// UPMS 只为 TABLE/TREE 菜单自动生成功能权限按钮，FORM 菜单必须手动补，
+// 否则打开/保存表单时报 "Insufficient permissions"
+menus.add(MetaMenu.createSimpleMenu("SiteConfig@ADD", "新增", "SiteConfig@ADD", formMenu, 10, MenuTypeEnum.BUTTON.getCode()));
+menus.add(MetaMenu.createSimpleMenu("SiteConfig@EDIT", "修改", "SiteConfig@EDIT", formMenu, 20, MenuTypeEnum.BUTTON.getCode()));
 ```
 
 要点：
 - FORM 视图字段只需写 `edit`，不需要 `views`（没有列表页）
-- **实体必须加 `authVerify = false`**：UPMS 只为 TABLE/TREE 菜单自动生成 ADD/EDIT 功能权限按钮，FORM 菜单没有，不关校验会在打开/保存时报 "Insufficient permissions"
+- **必须手动注册 `实体名@ADD` 和 `实体名@EDIT` 两个 BUTTON 权限菜单**（见上），这是 FORM 类型最常见的坑
+- 不要用 `authVerify = false` 图省事：它会整个跳过权限校验，任何登录用户（无论角色）都能访问该功能，脱离 RBAC 管控
 - 数据来源不限于数据库：`formViewBehavior`/`formSave` 里也可以读写文件、调外部 API
 - 保存前会正常执行字段校验（notNull、正则等）；`formSave` 里抛 `xyz.erupt.annotation.exception.EruptException` 可中止保存并向用户提示
 

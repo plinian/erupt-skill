@@ -141,7 +141,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | 编译大量报 `cannot find symbol` getter/setter | JDK 23+ 默认禁用隐式注解处理，确认 pom 的 maven-compiler-plugin 已配置 lombok `annotationProcessorPaths`（模板已内置）；同时确认实体类有 `@Getter @Setter` |
 | 提交表单报 500 `ReferenceError: "xxx" is not defined` | `@Dynamic` 的 condition 用了字段名作变量，改为固定变量 `value` |
 | 启动报 `Primary key not found` | 指向弹窗表单类 → `eruptClass` 表单类必须 `extends BaseModel`；指向自定义主键的实体 → `primaryKeyCol` 字段必须标注 `@EruptField`（可 `show = false` 隐藏） |
-| FORM 视图打开/保存报 "Insufficient permissions" | FORM 菜单没有自动生成的 ADD/EDIT 权限按钮，实体加 `@Erupt(authVerify = false)` |
+| FORM 视图打开/保存报 "Insufficient permissions" | FORM 菜单没有自动生成的 ADD/EDIT 权限按钮，按 annotations.md「单行数据表单管理」手动注册 `实体名@ADD`/`实体名@EDIT` 两个 BUTTON 菜单；不要用 `authVerify = false` 绕过（脱离 RBAC，不安全） |
 | 多个自定义按钮点击后都执行同一个逻辑 | 多个 `@RowOperation` 必须各设唯一 `code`，空串会永远命中第一个 |
 | Windows 环境 | 脚本需在 Git Bash / MSYS 中运行（Claude Code on Windows 自带 Git Bash），内置 windows x64 JDK 可直接使用；脚本跑不通时可自装 [JDK 17](https://adoptium.net) 与 [Maven](https://maven.apache.org) 后直接 `mvn spring-boot:run` |
 
