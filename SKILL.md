@@ -119,6 +119,9 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 | 需求 | 参考文档 |
 |------|---------|
 | 自定义按钮、数据过滤、钻取、卡片/甘特视图、字段联动、只读控制 | `reference/erupt-model.md` |
+| 列表合计行/顶部提醒/显示脱敏、Excel 导入导出拦截、选 A 带出 B、下拉级联、弹窗预填 | `reference/erupt-hooks.md` |
+| 数据权限（只看自己/本部门/按职级）、获取当前用户、SSO/LDAP 登录、OpenAPI、附件上云、配置速查 | `reference/erupt-upms.md` |
+| 数据不在数据库：对接 REST API / 跨库表 / 本地文件 / 命令输出 / 内存数据 | `reference/erupt-datasource.md` |
 | 多语言 / 国际化 | `reference/erupt-i18n.md` |
 | DataProxy / Service 中查询数据库 | `reference/erupt-lambda-query.md` |
 | BI 报表、数据立方体（@EruptCube） | `reference/erupt-cube.md` |
