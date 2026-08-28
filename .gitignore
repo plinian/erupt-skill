@@ -41,4 +41,5 @@ HELP.md
 *.db
 .claude/settings.local.json
 vendor/m2/
+vendor/jdk/
 .idea/

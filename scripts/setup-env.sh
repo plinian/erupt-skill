@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Prepare the erupt runtime environment: ensure JDK 17+ and Maven are available.
-# JDK resolution order: system JDK 17+ -> bundled JDK (vendor/jdk, extracted to
-# ~/.erupt-skill/runtime) -> online download.
+# JDK resolution order: system JDK 17+ -> cached runtime -> local vendor/jdk (if
+# present) -> minimized jlink runtime from GitHub Releases -> full JDK download.
 # On success, writes ~/.erupt-skill/env.sh for run.sh to source.
 set -euo pipefail
 
@@ -52,22 +52,34 @@ if command -v java >/dev/null 2>&1; then
 fi
 
 if [ -z "$JAVA_HOME_RESOLVED" ] && ! { command -v java >/dev/null 2>&1 && [ "$(java_major java || echo 0)" -ge 17 ] 2>/dev/null; }; then
-    bundled_tar="$VENDOR_JDK_DIR/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"
+    local_tar="$VENDOR_JDK_DIR/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"   # optional local runtime (maintainer / offline)
+    # Minimized jlink runtime published on GitHub Releases (~46MB; built for mac-aarch64 / windows-x64)
+    jlink_url="https://github.com/plinian/erupt-skill/releases/download/jdk-${JDK_MAJOR}/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"
     existing="$(find "$RUNTIME_DIR" -maxdepth 1 -type d -name "jdk-${JDK_MAJOR}*" 2>/dev/null | head -1 || true)"
     if jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min"; then
         JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
-        log "Using cached bundled JDK: $JAVA_HOME_RESOLVED"
-    elif [ -f "$bundled_tar" ]; then
-        log "Extracting bundled JDK ${JDK_MAJOR} (no download needed)..."
-        tar -xzf "$bundled_tar" -C "$RUNTIME_DIR"
-        jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min" || { log "Failed to extract bundled JDK"; exit 1; }
+        log "Using cached JDK: $JAVA_HOME_RESOLVED"
+    elif [ -f "$local_tar" ]; then
+        log "Extracting local JDK ${JDK_MAJOR} (no download needed)..."
+        tar -xzf "$local_tar" -C "$RUNTIME_DIR"
+        jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min" || { log "Failed to extract local JDK"; exit 1; }
         JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
-        log "Bundled JDK ready: $JAVA_HOME_RESOLVED"
+        log "JDK ready: $JAVA_HOME_RESOLVED"
     elif [ -n "$existing" ]; then
         JAVA_HOME_RESOLVED="$existing"
         [ "$OS" = "mac" ] && JAVA_HOME_RESOLVED="$existing/Contents/Home"
         log "Using cached JDK: $JAVA_HOME_RESOLVED"
     else
+        # Prefer the minimized jlink runtime (small); fall back to a full JDK if unavailable
+        min_tar="$RUNTIME_DIR/jdk-min.tar.gz"
+        if download "$jlink_url" "$min_tar" && tar -xzf "$min_tar" -C "$RUNTIME_DIR" 2>/dev/null && jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min"; then
+            JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
+            log "Minimized JDK ready: $JAVA_HOME_RESOLVED"
+        fi
+        rm -f "$min_tar"
+    fi
+
+    if [ -z "$JAVA_HOME_RESOLVED" ]; then
         pkg_ext="tar.gz"; [ "$OS" = "windows" ] && pkg_ext="zip"
         tarball="$RUNTIME_DIR/jdk.$pkg_ext"
         # Primary: official Adoptium API; fallback: Tsinghua mirror (faster in China)

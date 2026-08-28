@@ -6,7 +6,7 @@
 
 基于 [erupt](https://www.erupt.xyz) 低代码框架：说一句「帮我生成一个图书管理后台」，即可得到一个完整可运行的管理系统 —— 登录页、增删改查、搜索、导入导出、权限管理开箱即用。
 
-**无需开发环境**：仓库内置 jlink 裁剪的 OpenJDK 25 运行时（基于 Azul Zulu 构建，GPLv2 + Classpath Exception，无授权问题，每个约 46 MB，覆盖 macOS Apple Silicon 与 Windows x64；Linux 及其他平台自动在线下载），Maven 自动准备（缓存于 `~/.erupt-skill`），项目依赖走阿里云镜像加速，内置 H2 文件数据库，无需安装 MySQL。非开发人员也能一句话搭建任何领域的数据管理后台。
+**无需开发环境**：无系统 JDK 时，skill 会按需拉取 jlink 裁剪的 OpenJDK 25 运行时（基于 Azul Zulu 构建，GPLv2 + Classpath Exception，无授权问题，约 46 MB，缓存于 `~/.erupt-skill`；其他平台自动回退到完整 JDK 下载），Maven 自动准备，项目依赖走阿里云镜像加速，内置 H2 文件数据库，无需安装 MySQL。仓库本身仅约 1 MB，克隆即秒开。非开发人员也能一句话搭建任何领域的数据管理后台。
 
 ## 安装
 
@@ -48,16 +48,15 @@ reference/annotations.md    # 实体生成规范（决策表 + 常见坑）
 reference/erupt-*.md        # erupt 官方参考文档（注解字典、i18n、查询、Cube、API、TPL）
 template/                   # 可运行的 erupt 项目模板（erupt 追 Maven 最新 release + Spring Boot 3.5 + H2）
   └─ resources/public/      # app.js / app.css：标题、Logo、主题色、样式自定义入口
-scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 内置 JDK → 在线下载）
+scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 缓存 → Release 上的裁剪版 JDK → 完整 JDK 下载）
 scripts/compile.sh          # 仅编译校验（改代码后快速发现语法错误）
 scripts/run.sh              # 一键构建并启动
 scripts/build-m2-seed.sh    # 可选：生成本地依赖种子到 vendor/m2，实现首次构建完全离线
-scripts/build-jdk.sh        # 维护者用：jlink 构建 vendor/jdk 下的裁剪版 JDK 运行时
-vendor/jdk/                 # 内置 jlink 裁剪版 OpenJDK 25（mac arm64 / windows x64，Linux 自动在线下载）
+scripts/build-jdk.sh        # 维护者用：jlink 构建裁剪版 JDK 运行时（上传至 GitHub Release，不入 git）
 vendor/m2/                  # 可选本地依赖种子（不入 git）
 ```
 
 ## 环境要求
 
 - macOS / Linux / Windows（Windows 需在 Git Bash 中运行，Claude Code 已自带）
-- 可访问网络（首次下载 Maven 与项目依赖；JDK 已内置无需下载）
+- 可访问网络（首次下载 Maven 与项目依赖；无系统 JDK 时会额外拉取一次约 46 MB 的裁剪版 JDK 并缓存）

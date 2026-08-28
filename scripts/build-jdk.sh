@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Build the bundled minimal JDK runtimes under vendor/jdk (maintainer tool, not
-# used at skill runtime).
+# Build the minimal JDK runtimes into vendor/jdk (maintainer tool, not used at
+# skill runtime). The results are NOT committed — upload them as assets to the
+# GitHub Release tagged "jdk-25" so setup-env.sh can fetch them on demand.
 #
 # How it works: download a full JDK that ships jmods, then use jlink to
 # cross-build a minimal runtime for the target platform.
