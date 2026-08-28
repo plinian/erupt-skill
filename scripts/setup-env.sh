@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Prepare the erupt runtime environment: ensure JDK 17+ and Maven are available.
-# JDK resolution order: system JDK 17+ -> cached runtime -> local vendor/jdk (if
-# present) -> minimized jlink runtime (GitHub Release -> Gitee Release) -> full JDK download.
+# JDK resolution order: system JDK 17+ -> cached runtime -> download a full JDK
+# (Adoptium official; Tsinghua mirror fallback, fast in China).
 # On success, writes ~/.erupt-skill/env.sh for run.sh to source.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENDOR_JDK_DIR="$SCRIPT_DIR/../vendor/jdk"
 SKILL_HOME="${ERUPT_SKILL_HOME:-$HOME/.erupt-skill}"
 RUNTIME_DIR="$SKILL_HOME/runtime"
 ENV_FILE="$SKILL_HOME/env.sh"
@@ -52,40 +51,12 @@ if command -v java >/dev/null 2>&1; then
 fi
 
 if [ -z "$JAVA_HOME_RESOLVED" ] && ! { command -v java >/dev/null 2>&1 && [ "$(java_major java || echo 0)" -ge 17 ] 2>/dev/null; }; then
-    local_tar="$VENDOR_JDK_DIR/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"   # optional local runtime (maintainer / offline)
-    # Minimized jlink runtime (~46MB; built for mac-aarch64 / windows-x64).
-    # Try GitHub first, then the Gitee mirror (reachable in China when GitHub is not);
-    # a full JDK download is the last resort. Order matters: worse network -> smaller mirror.
-    jlink_urls=(
-        "https://github.com/plinian/erupt-skill/releases/download/jdk-${JDK_MAJOR}/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"
-        "https://gitee.com/erupt/erupt-skill/releases/download/jdk-${JDK_MAJOR}/jdk${JDK_MAJOR}-${OS}-${ARCH}.tar.gz"
-    )
+    # Reuse a JDK downloaded on a previous run, if any
     existing="$(find "$RUNTIME_DIR" -maxdepth 1 -type d -name "jdk-${JDK_MAJOR}*" 2>/dev/null | head -1 || true)"
-    if jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min"; then
-        JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
-        log "Using cached JDK: $JAVA_HOME_RESOLVED"
-    elif [ -f "$local_tar" ]; then
-        log "Extracting local JDK ${JDK_MAJOR} (no download needed)..."
-        tar -xzf "$local_tar" -C "$RUNTIME_DIR"
-        jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min" || { log "Failed to extract local JDK"; exit 1; }
-        JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
-        log "JDK ready: $JAVA_HOME_RESOLVED"
-    elif [ -n "$existing" ]; then
+    if [ -n "$existing" ]; then
         JAVA_HOME_RESOLVED="$existing"
         [ "$OS" = "mac" ] && JAVA_HOME_RESOLVED="$existing/Contents/Home"
         log "Using cached JDK: $JAVA_HOME_RESOLVED"
-    else
-        # Prefer the minimized jlink runtime (small); fall back to a full JDK if every mirror fails.
-        # tar failing on an anti-hotlink HTML page (e.g. Gitee) is treated as a miss and skipped.
-        min_tar="$RUNTIME_DIR/jdk-min.tar.gz"
-        for url in "${jlink_urls[@]}"; do
-            if download "$url" "$min_tar" && tar -xzf "$min_tar" -C "$RUNTIME_DIR" 2>/dev/null && jdk_ok "$RUNTIME_DIR/jdk${JDK_MAJOR}-min"; then
-                JAVA_HOME_RESOLVED="$RUNTIME_DIR/jdk${JDK_MAJOR}-min"
-                log "Minimized JDK ready: $JAVA_HOME_RESOLVED"
-                break
-            fi
-        done
-        rm -f "$min_tar"
     fi
 
     if [ -z "$JAVA_HOME_RESOLVED" ]; then
