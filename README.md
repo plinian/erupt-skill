@@ -23,7 +23,7 @@ This skill follows the open [Agent Skills](https://agentskills.io) standard (SKI
 Example (Claude Code):
 
 ```bash
-git clone https://github.com/erupts/erupt-skill.git ~/.claude/skills/erupt-admin
+git clone https://github.com/plinian/erupt-skill.git ~/.claude/skills/erupt-admin
 ```
 
 For any tool without native skill support, just clone this repo anywhere and tell the agent: *"Read SKILL.md in this repo and follow its workflow to build me a XXX admin backend."*

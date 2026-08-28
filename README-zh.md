@@ -23,7 +23,7 @@
 以 Claude Code 为例：
 
 ```bash
-git clone https://github.com/erupts/erupt-skill.git ~/.claude/skills/erupt-admin
+git clone https://github.com/plinian/erupt-skill.git ~/.claude/skills/erupt-admin
 ```
 
 若工具不支持 skills，也可将仓库克隆到任意位置，然后直接对 AI 说：「阅读这个仓库的 SKILL.md 并按其流程帮我生成一个 XXX 管理后台」。
