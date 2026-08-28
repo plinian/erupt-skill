@@ -48,11 +48,11 @@ reference/annotations.md    # entity generation spec (decision tables + common p
 reference/erupt-*.md        # official erupt reference docs (annotations, i18n, query, Cube, API, TPL)
 template/                   # runnable erupt project template (latest erupt release + Spring Boot 3.5 + H2)
   └─ resources/public/      # app.js / app.css: title, logo, theme color, style customization
-scripts/setup-env.sh        # prepare JDK + Maven (system JDK → cached → minimized JDK from Release → full JDK download)
+scripts/setup-env.sh        # prepare JDK + Maven (system JDK → cached → minimized JDK from GitHub/Gitee Release → full JDK download)
 scripts/compile.sh          # compile-only check (catch syntax errors after code changes)
 scripts/run.sh              # one-command build and start
 scripts/build-m2-seed.sh    # optional: build a local dependency seed into vendor/m2 for fully-offline first builds
-scripts/build-jdk.sh        # maintainer: jlink-build the minimized JDK runtimes (uploaded to the GitHub Release, not committed)
+scripts/build-jdk.sh        # maintainer: jlink-build the minimized JDK runtimes (uploaded to the GitHub + Gitee Release, not committed)
 ```
 
 ## Requirements

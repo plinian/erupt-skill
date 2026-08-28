@@ -20,7 +20,7 @@ bash <skill目录>/scripts/warmup.sh
 该脚本先准备 JDK/Maven 环境，再用模板项目跑一次真实构建，把 Spring Boot 与 erupt 依赖提前下载到 `~/.m2`——这样在你解析需求、编写代码的同时，依赖已在并行下载，用户项目首次构建基本免等待。环境说明：
 
 - 系统已有 JDK 17+ 和 Maven 时直接复用，秒级完成
-- 无系统 JDK 时按需拉取 **jlink 裁剪版 OpenJDK 25**（约 46 MB，从 GitHub Release 下载，基于 Azul Zulu 构建，含 mac arm64 与 windows x64，GPLv2 + Classpath Exception 协议，无授权问题，已实测覆盖编译、启动与 Excel 导入导出），解压到 `~/.erupt-skill/runtime` 后缓存复用
+- 无系统 JDK 时按需拉取 **jlink 裁剪版 OpenJDK 25**（约 46 MB，从 GitHub Release 下载，GitHub 不通时自动切 Gitee 兜底，基于 Azul Zulu 构建，含 mac arm64 与 windows x64，GPLv2 + Classpath Exception 协议，无授权问题，已实测覆盖编译、启动与 Excel 导入导出），解压到 `~/.erupt-skill/runtime` 后缓存复用
 - 无裁剪版可用时（如 Linux/其他平台）回退到完整 JDK 在线下载：官方源失败自动切清华镜像；Maven 3.9 自动下载，依赖默认走阿里云镜像
 - `vendor/m2/`（不入 git）可选放置依赖种子（`scripts/build-m2-seed.sh` 生成），存在时首次构建完全免下载
 - 依赖预热按模板 pom 内容做缓存标记，重复调用秒级返回；预热失败不阻塞流程，`run.sh` 构建时会自动补齐
