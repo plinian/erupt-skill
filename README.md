@@ -1,6 +1,6 @@
 # erupt-skill
 
-English | [简体中文](README-zh.md)
+English | [简体中文](README.zh.md)
 
 A Claude Code Skill that generates a data admin backend from a single sentence.
 
