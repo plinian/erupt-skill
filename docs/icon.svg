@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
-    <title id="title">Brutalist Minimal Pentagon Logo</title>
-    <desc id="desc">Vector reconstruction of the selected first composition.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+    <title id="title">erupt-skill — erupting volcano mark</title>
 
-    <rect width="1254" height="1254" fill="#14120B"/>
+    <!-- cream paper ground -->
+    <rect width="48" height="48" fill="#FFF9EE"/>
 
-    <!-- Exact beam silhouettes traced from the selected first version. -->
-    <g fill="#FFF9EE">
-        <polygon points="9,1 174,2 459,870 293,870"/>
-        <polygon points="874,1 1163,1 383,554 334,402"/>
-        <polygon points="805,287 1251,612 1253,817 670,382"/>
-        <polygon points="909,593 1042,693 854,1252 684,1253"/>
-        <polygon points="1,901 773,901 718,1061 1,1060"/>
-    </g>
+    <!-- flying debris stickers -->
+    <rect x="5.5" y="6" width="4.2" height="4.2" fill="#F7BFD2" stroke="#14120B" stroke-width="2" stroke-linejoin="round" transform="rotate(16 7.6 8.1)"/>
+    <rect x="38.5" y="11" width="3.8" height="3.8" fill="#93D655" stroke="#14120B" stroke-width="2" stroke-linejoin="round" transform="rotate(-14 40.4 12.9)"/>
 
-    <!-- Exact center silhouette, recolored to the requested cyan. -->
-    <polygon fill="#4FC8EC" points="644,407 879,582 784,863 502,862 411,584"/>
+    <!-- eruption burst -->
+    <polygon points="24,1.5 27.4,7.6 33,9.5 27.4,11.4 24,17.5 20.6,11.4 15,9.5 20.6,7.6"
+             fill="#FCE566" stroke="#14120B" stroke-width="2.6" stroke-linejoin="round"/>
+
+    <!-- volcano -->
+    <polygon points="5.5,43 16.5,19.5 31.5,19.5 42.5,43"
+             fill="#4FC8EC" stroke="#14120B" stroke-width="2.8" stroke-linejoin="round"/>
 </svg>
