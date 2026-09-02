@@ -96,6 +96,14 @@ public class Book extends BaseModel {
 
 注意：`type = EditType.CHOICE` 等需要子注解的类型必须同时写子注解；带子注解属性（boolType、dateType、numberType 等）时 type 可省略（AUTO 会识别）。
 
+**表单组织（字段多时主动用，提升录入体验）**：
+
+- 字段很多（约 12 个以上）→ `@Erupt` 加 `layout = @Layout(formSteps = true)` 开启**分步表单向导**，用 `DIVIDE` 字段（加 `@Transient`）做分步边界，其 title/desc 即步骤标题/描述
+- 非核心字段（备注、扩展信息等）→ `GROUP` 折叠面板收纳：`@Transient` 容器字段 + `groupType = @GroupType(fields = {"remark", "tag"}, collapsed = true)`
+- 表单顶部要放填写说明 → `CALLOUT`：`@Transient` 字段 + `calloutType = @CalloutType(value = "带 <b>*</b> 为必填", style = CalloutType.Style.INFO)`
+
+以上写法细节与坑见 erupt-model.md「EditType 枚举 · 新组件要点」与「@Layout」。
+
 ## 关联关系
 
 ### 多对一（下拉表格选择，最常用）
@@ -130,7 +138,7 @@ private Department department;
 )
 private List<OrderItem> items;
 ```
-要点：子表实体也要有 @Erupt 注解但可以不需要独立菜单；TAB_TABLE_ADD 不写 views。
+要点：子表实体也要有 @Erupt 注解但可以不需要独立菜单；TAB_TABLE_ADD 不写 views。子表**字段多、行数少**（如收货地址、联系人）时改用 `type = EditType.MULTI_FORM`：用法完全相同，子记录渲染为内联表单块直接编辑，比表格行+弹窗更直观。两者的子表实体都不要用 Lombok `@Data`（Set 的 equals/hashCode 会导致去重异常）。
 
 ### 多对多（复选框）
 ```java
@@ -170,6 +178,38 @@ public class Category extends BaseModel {
 }
 ```
 需要 import `xyz.erupt.annotation.sub_erupt.Tree`。
+
+## 左树右表（@LinkTree，业务表带树形维度时优先用）
+
+业务实体有一个树形维度（员工→部门、商品→分类、门店→区域）时，在 @Erupt 上加 `linkTree`：页面左侧渲染维度树，点击节点右侧表格自动过滤，数据可视化浏览体验远好于让用户在搜索栏里手选。**生成时识别到"业务表 + 树形维度"组合就主动配置，不要等用户提。**
+
+```java
+@Erupt(name = "员工管理", linkTree = @LinkTree(field = "dept"))
+@Table(name = "t_employee")
+@Entity
+@Getter
+@Setter
+public class Employee extends BaseModel {
+
+    @ManyToOne
+    @EruptField(
+            views = @View(title = "所属部门", column = "name"),
+            edit = @Edit(title = "所属部门", type = EditType.REFERENCE_TREE,
+                    referenceTreeType = @ReferenceTreeType(pid = "parent.id"))
+    )
+    private Department dept;   // linkTree.field 指向的就是这个字段名
+
+    // ...其他业务字段
+}
+```
+
+要点：
+1. `field` 指向实体中的树引用字段（多对一 + REFERENCE_TREE）；树实体本身（如 Department）按上节「树形结构」配好 `@Tree` 即可
+2. `dependNode = false`（默认）：左树带"全部"入口，不选节点时右表显示全部数据——常规场景用这个
+3. `dependNode = true`：右表数据必须先选树节点才加载，且**新增记录时自动填充当前选中节点**（此时该字段可以不声明 @EruptField，表单里不出现，由树选择隐式决定归属）
+4. 左树只做导航过滤，维度本身的增删改仍在树实体自己的菜单里维护
+
+需要 import `xyz.erupt.annotation.sub_erupt.LinkTree`。
 
 ## 单行数据表单管理（FORM 视图，适合系统设置/参数配置）
 

@@ -32,6 +32,7 @@ bash <skill目录>/scripts/warmup.sh
 - 识别核心实体（通常 2~5 个），如"图书管理" → 图书、分类、借阅记录
 - 为每个实体设计 5~10 个常识字段（名称、状态、时间、金额等）
 - 识别实体间关系（分类→树形、明细→一对多、标签→多对多）
+- 业务实体带树形维度（部门、分类、区域等）时，主动为其配置 **左树右表**（`linkTree`）：左侧树导航 + 右侧表格联动过滤，数据可视化浏览体验远好于纯列表，见 annotations.md「左树右表」
 - 全局只有一条记录的实体（系统设置、参数配置等）→ FORM 表单视图，见 annotations.md「单行数据表单管理」
 - 实体与字段命名用英文，界面标题（title）用用户使用的语言
 
@@ -117,7 +118,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 | 需求 | 参考文档 |
 |------|---------|
-| 自定义按钮、数据过滤、钻取、卡片/甘特视图、字段联动、只读控制 | `reference/erupt-model.md` |
+| 自定义按钮、数据过滤、钻取、左树右表、卡片/甘特视图、字段联动、只读控制 | `reference/erupt-model.md` |
 | 列表合计行/顶部提醒/显示脱敏、Excel 导入导出拦截、选 A 带出 B、下拉级联、弹窗预填 | `reference/erupt-hooks.md` |
 | 数据权限（只看自己/本部门/按职级）、获取当前用户、SSO/LDAP 登录、OpenAPI、附件上云、配置速查 | `reference/erupt-upms.md` |
 | 数据不在数据库：对接 REST API / 跨库表 / 本地文件 / 命令输出 / 内存数据 | `reference/erupt-datasource.md` |
@@ -132,7 +133,7 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 本地 reference 只保留**决策规则**与**实测坑**（官方文档没有的），API 细节一律走官方文档。
 
-**兜底**：本地参考文档解决不了时（报错含义不明、不熟悉的注解属性、高级模块用法等），按 `reference/doc-map.md` 找到对应主题，用 WebFetch 拉取 GitHub raw markdown 阅读后再作答，不要凭猜测编写代码。**注意：官网 https://docs.erupt.xyz 是 JS 渲染，WebFetch 抓不到正文，必须走 doc-map 里的 `raw.githubusercontent.com/.../en/*.md` 地址。**
+**兜底**：本地参考文档解决不了时（报错含义不明、不熟悉的注解属性、高级模块用法等），按 `reference/doc-map.md` 找到对应主题，用 WebFetch 拉取官方文档阅读后再作答，不要凭猜测编写代码。**官网 https://docs.erupt.xyz 是 VitePress 静态站点，直接 WebFetch `https://docs.erupt.xyz/en/<相对路径>`（语言前缀必带，不加 `.html`）即可拿到完整正文；官网不可达时再退回 doc-map 里的 `raw.githubusercontent.com` 地址。**
 
 **文档与实际冲突时以发布版为准**：reference 文档是人工维护的快照，可能落后于 erupt 新版本。当编译/运行结果与文档描述冲突时，以发布版 jar 的实际内容为准，不要对照 erupt 主仓库开发分支源码——开发版与发布版的 API 位置可能不同。使用不熟悉的注解组合（多 RowOperation、eruptClass 弹窗表单、@Dynamic 联动等）前，先在参考文档或发布版 jar 中核实用法再生成代码，一次写对远比编译报错后反复试错省时省 token。
 

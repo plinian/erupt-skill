@@ -138,10 +138,12 @@
 
 ### `@LinkTree` — 左树右表
 
+左侧维度树 + 右侧表格联动过滤，业务实体带树形维度（员工→部门、商品→分类、门店→区域）时优先配置，可视化浏览体验远好于纯列表。完整示例与决策规则见 annotations.md「左树右表」。
+
 ```java
 @LinkTree(
-    field = "dept",        // 实体中关联树的字段名
-    dependNode = false     // 表格数据是否必须依赖树节点（false = 无选择时显示所有）
+    field = "dept",        // 实体中关联树的字段名（多对一 + REFERENCE_TREE），树实体自身需配 @Tree
+    dependNode = false     // false（默认）= 不选节点时显示全部；true = 必须选节点，且新增时自动填充所选节点
 )
 ```
 
@@ -152,6 +154,7 @@
 ```java
 @Layout(
     formSize = Layout.FormSize.DEFAULT,           // DEFAULT（默认）/ FULL_LINE（整行表单）
+    formSteps = false,                            // 分步表单向导（2.1.1+，见下）
     tableLeftFixed = 0,                           // 表格左侧固定列数
     tableRightFixed = 0,                          // 表格右侧固定列数
     pagingType = Layout.PagingType.BACKEND,       // 分页方式（见下）
@@ -159,11 +162,32 @@
     pageSizes = {10, 20, 30, 50, 100, 300, 500},  // 可选分页数
     refreshTime = -1,                             // 自动刷新间隔（毫秒，-1 不刷新）
     tableWidth = "",                              // 表格宽度
-    tableOperatorWidth = ""                       // 操作列宽度
+    tableOperatorWidth = "",                      // 操作列宽度
+    collapseActionButton = false                  // 行内查看/修改/删除折叠为下拉菜单（2.0.0+）
 )
 ```
 
 **`PagingType` 枚举：** `BACKEND`（后端分页）/ `FRONT`（前端分页）/ `NONE`（不分页）
+
+**`formSteps` 分步表单（2.1.1+）**：表单字段很多（约 12 个以上）时开启，渲染为分步向导，顶部步骤条显示进度。分步以 `DIVIDE` 字段为边界——每个 DIVIDE 开启一个新步骤，其 `title`/`desc` 即步骤标题/描述，其后的字段归属该步骤；DIVIDE 字段加 `@Transient`。「下一步」触发当前步骤的必填校验，步骤条可自由回退、向前跳转会依次校验途经步骤：
+
+```java
+@Erupt(name = "入职登记", layout = @Layout(formSteps = true))
+public class EmployeeEntry extends BaseModel {
+
+    @Transient
+    @EruptField(edit = @Edit(title = "基本信息", desc = "填写个人基础资料", type = EditType.DIVIDE))
+    private String step1;
+
+    // ...本步骤的字段
+
+    @Transient
+    @EruptField(edit = @Edit(title = "联系方式", type = EditType.DIVIDE))
+    private String step2;
+
+    // ...本步骤的字段
+}
+```
 
 ---
 
@@ -322,6 +346,9 @@
     referenceTableType = @ReferenceTableType(...),
     checkboxType = @CheckboxType(...),
     codeEditType = @CodeEditorType(language="java"),
+    groupType = @GroupType(...),
+    calloutType = @CalloutType(...),
+    buttonType = @ButtonType(...),
     tplType = @Tpl(path="")
 )
 ```
@@ -332,6 +359,7 @@
 |--------|------|---------|
 | `AUTO` | 自动检测 | 任意 |
 | `INPUT` | 文本输入框 | String、数字 |
+| `PASSWORD` | 密码输入框（列表不显示、编辑留空不覆盖） | String |
 | `NUMBER` | 数字输入框 | 数字 |
 | `SLIDER` | 数字滑块 | 数字 |
 | `COLOR` | 颜色选择器 | String |
@@ -349,7 +377,10 @@
 | `ATTACHMENT` | 附件上传 | String |
 | `MAP` | 地图 | String |
 | `TPL` | 自定义 HTML 模板 | String |
-| `DIVIDE` | 横向分割线 | — |
+| `DIVIDE` | 横向分割线（formSteps 开启时兼作分步边界） | — |
+| `GROUP` | 字段分组折叠面板（容器，不存数据） | —（@Transient） |
+| `CALLOUT` | 表单内静态提示区块（不存数据） | —（@Transient） |
+| `BUTTON` | 表单内操作按钮，点击调后端处理器（不存数据） | —（@Transient） |
 | `HIDDEN` | 隐藏字段 | 任意 |
 | `EMPTY` | 占位空白 | — |
 | `SIGNATURE` | 签名板 | String |
@@ -359,7 +390,17 @@
 | `TAB_TREE` | 多选树（多对多） | 对象集合 |
 | `TAB_TABLE_REFER` | 多选表格（多对多） | 对象集合 |
 | `TAB_TABLE_ADD` | 表格添加（一对多） | 对象集合 |
-| `COMBINE` | 表格合并（一对一） | 对象 |
+| `MULTI_FORM` | 内联表单块编辑（一对多，子表字段多、行数少时优于 TAB_TABLE_ADD） | 对象集合 |
+| `COMBINE` | 嵌套表单（一对一，支持 JSON 单字段存储） | 对象 |
+
+**新组件要点（2.0+）：**
+
+- `PASSWORD`：列表页不渲染值、不支持搜索；编辑时以掩码回显（原值不下发客户端），留空/掩码原样提交则后端收到 `null` 不覆盖原密码——DataProxy 加密时 `beforeUpdate` 必须判空再加密。最大长度用 `inputType = @InputType(length = 32)` 控制
+- `GROUP`：`groupType = @GroupType(fields = {"a", "b"}, collapsed = true)`，把已定义字段收进可折叠面板（面板标题取 @Edit 的 title），字段仍参与校验；容器字段加 `@Transient`，不支持嵌套 GROUP
+- `CALLOUT`：`calloutType = @CalloutType(value = "支持 <b>HTML</b>", style = CalloutType.Style.INFO)`，样式 CARD（默认卡片）/INFO/SUCCESS/WARNING/ERROR（提示条）；字段加 `@Transient`
+- `BUTTON`：`buttonType = @ButtonType(handler = XxxHandler.class, icon = "fa fa-bolt", confirm = "确认执行？")`，handler 实现 `EruptButtonHandler<实体>` 的 `click(entity, params)`（入参为当前表单全量数据，返回值为前端要执行的 JS 表达式如 `"msg.success('OK')"`，null 表示不执行）；另有 `populateForm`（回填表单值）、`buildEditExpr`（动态改其他字段注解配置）两个可选钩子。适合连通性测试、配置校验类场景；字段加 `@Transient`
+- `MULTI_FORM`：用法与 TAB_TABLE_ADD 完全一致（@OneToMany + cascade），仅展现形态不同——每行子记录渲染为内联表单块而非表格行；同样不要在子表实体用 Lombok `@Data`
+- `COMBINE` 存 JSON：Hibernate 6（Spring Boot 3）下去掉 @OneToOne/@JoinColumn，字段加 `@JdbcTypeCode(SqlTypes.JSON)`，关联对象整体序列化存主表单字段，子对象无需 @Entity；适合无需关联查询的扩展信息
 
 ---
 

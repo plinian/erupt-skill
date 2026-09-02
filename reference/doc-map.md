@@ -4,13 +4,15 @@
 
 ## 怎么读官方文档
 
-**官网 https://docs.erupt.xyz 是 JS 渲染的，WebFetch / curl 抓不到正文**（实测只返回导航碎片）。必须读 GitHub 上的 raw markdown 源文件：
+**官网 https://docs.erupt.xyz 是 VitePress 静态站点（SSG），正文直接在 HTML 里，WebFetch 即可完整抓取**，优先访问官网：
 
 ```
-基址：https://raw.githubusercontent.com/erupts/erupt-docs/main/en/<相对路径>.md
+基址：https://docs.erupt.xyz/en/<相对路径>
 ```
 
-用 WebFetch 拉上述 URL 即可拿到完整正文。下表给相对路径（去掉 `.md`）。中文版把 `/en/` 换成 `/zh/`。
+注意：语言前缀 `en`/`zh` 必须带（根路径下没有页面），路径末尾**不加 `.html`**。中文版把 `/en/` 换成 `/zh/`。下表给相对路径。
+
+兜底（官网不可达时）：读 GitHub raw markdown 源文件 `https://raw.githubusercontent.com/erupts/erupt-docs/main/en/<相对路径>.md`。
 
 ## 相对路径速查
 
@@ -37,7 +39,7 @@
 | EruptDao 用法 | `advanced/erupt-dao`、`advanced/erupt-dao-lambda` |
 
 ### 注解（annotation/）
-`annotation/erupt`、`annotation/erupt-field`、`annotation/edit`、`annotation/view`、`annotation/power`、`annotation/search`、`annotation/filter`、`annotation/tree`、`annotation/link-tree`、`annotation/drill`、`annotation/row-operation`、`annotation/on-change`、`annotation/dynamic`、`annotation/drag-sort`、`annotation/layout`、`annotation/order-by`、`annotation/vis`（卡片/看板/甘特/日历）
+`annotation/erupt`、`annotation/erupt-field`、`annotation/edit`、`annotation/view`、`annotation/power`、`annotation/search`、`annotation/filter`、`annotation/tree`、`annotation/link-tree`、`annotation/drill`、`annotation/row-operation`、`annotation/on-change`、`annotation/dynamic`、`annotation/drag-sort`、`annotation/layout`、`annotation/form-steps`（分步表单）、`annotation/order-by`、`annotation/vis`（卡片/看板/甘特/日历）
 
 ### 字段类型（field-types/）
 每种 EditType 一页，总览在 `field-types/index`；具体如 `field-types/choice`、`field-types/reference-table`、`field-types/attachment`、`field-types/tab-table-add`、`field-types/button` 等。
