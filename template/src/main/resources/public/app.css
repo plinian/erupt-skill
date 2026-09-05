@@ -1,7 +1,31 @@
-/* erupt 前端自定义样式：写入 CSS 即可覆盖后台默认样式，刷新页面生效 */
+/* erupt 前端自定义样式：在此写 CSS 即可覆盖后台默认样式，无需改 Java、无需重新构建，重启后刷新页面生效 */
+/* 提示：不确定选择器时，浏览器 F12 审查元素即可；覆盖不生效时加 !important 提高优先级 */
 
-/* 示例：修改登录页背景
-.login-container {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+/* 例 1：自定义菜单图标——菜单 icon 是原样渲染的 class 名，可自定义类名并用 emoji 或图片渲染
+   MetaMenu.createRootMenu("$biz", "业务管理", "icon-biz", 10)  →  这里定义 .icon-biz */
+/*
+.icon-biz:before { content: "📦"; }
+.icon-report:before { content: "📊"; }
+.icon-setting:before { content: "⚙️"; }
+*/
+
+/* 例 2：登录页背景图（图片放到 src/main/resources/public/assets/ 下） */
+/*
+layout-passport > .container {
+    background: #fff url(./assets/login-bg.svg) center / cover no-repeat !important;
+}
+*/
+
+/* 例 3：登录页标题字体 */
+/*
+layout-passport .title {
+    font-family: "Courier New", Menlo, Monaco, Consolas, monospace !important;
+}
+*/
+
+/* 例 4：去掉顶栏阴影 */
+/*
+.alain-default__header {
+    box-shadow: none !important;
 }
 */

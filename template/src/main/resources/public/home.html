@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>__APP_TITLE__</title>
+    <!--
+      登录后的默认首页。erupt 以 iframe 加载本页（同源），URL 自带 _token 与 _lang 参数，
+      因此可以直接调用 erupt-api（请求头 token: _token）。下方默认渲染「系统标题 + 菜单快捷入口」，
+      需要仪表盘、数据大屏时直接改本页即可，也可用 <a target="_parent" href="#/build/table/Xxx"> 跳转到主框架菜单。
+    -->
+    <style>
+        :root {
+            --primary: #3f51b5;
+            --ink: #1f2329;
+            --ink-2: #646a73;
+            --line: #e5e6eb;
+            --paper: #ffffff;
+            --r: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+            color: var(--ink);
+            /* 与登录页 / 加载页同款背景（由 erupt 前端资源提供） */
+            background: #f5f7fa url('assets/passport/passport-bg.svg') no-repeat center center / cover;
+            overflow: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 32px 48px; }
+
+        .hero {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            gap: 24px; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .hero h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+        .hero h1 span { color: var(--primary); }
+        .hero p { margin-top: 8px; font-size: 14px; color: var(--ink-2); line-height: 1.7; max-width: 640px; }
+        .greet { text-align: right; font-size: 13px; color: var(--ink-2); line-height: 1.8; }
+        .greet b { display: block; font-size: 15px; color: var(--ink); font-weight: 600; }
+
+        .section {
+            display: flex; align-items: center; gap: 10px;
+            margin: 26px 0 12px; font-size: 13px; font-weight: 600; color: var(--ink-2); letter-spacing: .04em;
+        }
+        .section::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+        .card {
+            display: block; position: relative; overflow: hidden;
+            background: var(--paper); border: 1px solid var(--line); border-radius: var(--r);
+            padding: 16px 18px; text-decoration: none; color: inherit;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px -14px rgba(0, 0, 0, .28); border-color: var(--primary); }
+        .card .mark {
+            width: 36px; height: 36px; border-radius: 8px; margin-bottom: 12px;
+            background: var(--primary); color: #fff; opacity: .9;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;
+        }
+        .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .card small { font-size: 12px; color: var(--ink-2); }
+        .card .type {
+            position: absolute; right: 12px; top: 12px;
+            font-size: 11px; color: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+        }
+
+        .empty {
+            padding: 40px; text-align: center; font-size: 13px; color: var(--ink-2);
+            background: var(--paper); border: 1px dashed var(--line); border-radius: var(--r);
+        }
+        .foot {
+            margin-top: 36px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+            font-size: 12px; color: var(--ink-2);
+        }
+        .foot a { color: inherit; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="hero">
+        <div>
+            <h1 id="title"></h1>
+            <p id="desc"></p>
+        </div>
+        <div class="greet"><b id="greet"></b><span id="today"></span></div>
+    </div>
+
+    <div id="menus"></div>
+
+    <div class="foot">
+        <span id="footLeft"></span>
+        <span>Powered by <a href="https://www.erupt.xyz" target="_blank">erupt</a></span>
+    </div>
+</div>
+
+<script>
+(function () {
+    // 与 app.js 的 title / desc 保持一致（生成时统一替换占位符）
+    var APP = { title: '__APP_TITLE__', desc: '__APP_DESC__' };
+
+    var query = new URLSearchParams(location.search);
+    var token = query.get('_token') || '';
+    var zh = (query.get('_lang') || 'zh-CN').indexOf('zh') === 0;
+    document.documentElement.lang = zh ? 'zh-CN' : 'en';
+
+    var t = zh ? {
+        morning: '早上好', afternoon: '下午好', evening: '晚上好',
+        quick: '快捷入口', other: '其他', empty: '暂无可访问的菜单，请联系管理员分配权限',
+        count: function (n) { return '共 ' + n + ' 个功能模块'; },
+        types: { table: '数据表', tree: '树形', form: '表单', tpl: '页面', mtpl: '页面', bi: '报表', cube: '分析', aiCanvas: 'AI', link: '链接', newWindow: '链接', selfWindow: '链接', router: '页面', fill: '页面' }
+    } : {
+        morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening',
+        quick: 'Quick access', other: 'Other', empty: 'No accessible menus. Ask an administrator for permissions.',
+        count: function (n) { return n + ' modules'; },
+        types: { table: 'Table', tree: 'Tree', form: 'Form', tpl: 'Page', mtpl: 'Page', bi: 'Report', cube: 'Cube', aiCanvas: 'AI', link: 'Link', newWindow: 'Link', selfWindow: 'Link', router: 'Page', fill: 'Page' }
+    };
+
+    // 主色跟随主框架 app.js 的 theme.primaryColor
+    try {
+        var cfg = window.parent && window.parent.eruptSiteConfig;
+        var pc = cfg && cfg.theme && cfg.theme.primaryColor;
+        if (pc) document.documentElement.style.setProperty('--primary', pc);
+        if (cfg && cfg.title && APP.title.indexOf('__') === 0) APP.title = cfg.title;
+        if (cfg && cfg.desc && APP.desc.indexOf('__') === 0) APP.desc = cfg.desc;
+    } catch (e) { /* 跨域时忽略 */ }
+
+    document.getElementById('title').textContent = APP.title;
+    document.getElementById('desc').textContent = APP.desc;
+
+    var h = new Date().getHours();
+    document.getElementById('greet').textContent = h < 12 ? t.morning : (h < 18 ? t.afternoon : t.evening);
+    document.getElementById('today').textContent = new Date().toLocaleDateString(zh ? 'zh-CN' : 'en-US',
+        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // 菜单类型 → 主框架路由（与 erupt-web generateMenuPath 保持一致）
+    function menuPath(type, value) {
+        value = value || '';
+        var fill = value.indexOf('fill=1') !== -1 || value.indexOf('fill=true') !== -1;
+        var p = null;
+        switch (type) {
+            case 'table': p = '/build/table/' + value; break;
+            case 'tree': p = '/build/tree/' + value; break;
+            case 'form': p = '/build/form/' + value; break;
+            case 'bi': p = '/bi/' + value; break;
+            case 'cube': p = '/cube/' + value; break;
+            case 'tpl': p = '/tpl/' + value; break;
+            case 'mtpl': p = '/mtpl/' + value; break;
+            case 'aiCanvas': p = '/ai/canvas/' + value; break;
+            case 'router': p = value; break;
+            case 'fill': p = value.charAt(0) === '/' ? '/fill' + value : '/fill/' + value; break;
+            case 'link': p = '/site/' + encodeURIComponent(btoa(encodeURIComponent(value))); break;
+        }
+        return p ? (fill ? '/fill' + p : p) : null;
+    }
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    var box = document.getElementById('menus');
+
+    function render(menus) {
+        var byId = {};
+        menus.forEach(function (m) { byId[m.id] = m; });
+        var groups = [], groupIdx = {}, total = 0;
+
+        menus.forEach(function (m) {
+            if (m.type === 'button' || m.type === 'api' || !m.type) return;
+            // 跳过内置「首页」菜单（router "/"），本页就是首页
+            if (m.type === 'router' && (m.value === '/' || !m.value)) return;
+            var href, target = '_parent';
+            if (m.type === 'newWindow' || m.type === 'selfWindow') {
+                href = m.value; target = m.type === 'newWindow' ? '_blank' : '_top';
+            } else {
+                var p = menuPath(m.type, m.value);
+                if (!p) return;
+                href = '#' + p;
+            }
+            var parent = byId[m.pid];
+            var gname = parent ? parent.name : t.other;
+            if (groupIdx[gname] === undefined) { groupIdx[gname] = groups.length; groups.push({ name: gname, items: [] }); }
+            groups[groupIdx[gname]].items.push({ name: m.name, type: m.type, href: href, target: target });
+            total++;
+        });
+
+        if (!total) { box.innerHTML = '<div class="empty">' + esc(t.empty) + '</div>'; return; }
+
+        box.innerHTML = groups.map(function (g) {
+            return '<div class="section">' + esc(g.name) + '</div><div class="grid">' +
+                g.items.map(function (it) {
+                    return '<a class="card" href="' + esc(it.href) + '" target="' + it.target + '">' +
+                        '<span class="type">' + esc(t.types[it.type] || it.type) + '</span>' +
+                        '<div class="mark">' + esc(it.name.trim().charAt(0)) + '</div>' +
+                        '<h3>' + esc(it.name) + '</h3>' +
+                        '</a>';
+                }).join('') + '</div>';
+        }).join('');
+        document.getElementById('footLeft').textContent = t.count(total);
+    }
+
+    fetch('erupt-api/menu', { headers: { token: token } })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (menus) { render(Array.isArray(menus) ? menus : []); })
+        .catch(function () { box.innerHTML = ''; });
+})();
+</script>
+</body>
+</html>

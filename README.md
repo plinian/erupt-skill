@@ -47,7 +47,7 @@ SKILL.md                    # main skill workflow
 reference/annotations.md    # entity generation spec (decision tables + common pitfalls)
 reference/erupt-*.md        # official erupt reference docs (annotations, i18n, query, Cube, API, TPL)
 template/                   # runnable erupt project template (latest erupt release + Spring Boot 3.5 + H2)
-  └─ resources/public/      # app.js / app.css: title, logo, theme color, style customization
+  └─ resources/public/      # app.js (eruptSiteConfig: title/logo/theme/hooks) · app.css (styles) · home.html (post-login home page)
 scripts/setup-env.sh        # prepare JDK + Maven (system JDK → cached → download JDK: Adoptium official, Tsinghua mirror fallback)
 scripts/compile.sh          # compile-only check (catch syntax errors after code changes)
 scripts/run.sh              # one-command build and start

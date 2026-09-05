@@ -47,7 +47,7 @@ SKILL.md                    # skill 主流程
 reference/annotations.md    # 实体生成规范（决策表 + 常见坑）
 reference/erupt-*.md        # erupt 官方参考文档（注解字典、i18n、查询、Cube、API、TPL）
 template/                   # 可运行的 erupt 项目模板（erupt 追 Maven 最新 release + Spring Boot 3.5 + H2）
-  └─ resources/public/      # app.js / app.css：标题、Logo、主题色、样式自定义入口
+  └─ resources/public/      # app.js（eruptSiteConfig：标题/Logo/主题/钩子）· app.css（样式）· home.html（登录后首页）
 scripts/setup-env.sh        # 准备 JDK + Maven（系统 JDK → 缓存 → 下载 JDK：Adoptium 官方源，国内切清华镜像）
 scripts/compile.sh          # 仅编译校验（改代码后快速发现语法错误）
 scripts/run.sh              # 一键构建并启动

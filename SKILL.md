@@ -65,7 +65,7 @@ bash <skill目录>/scripts/warmup.sh
    > - erupt 兜底版本：`template/pom.xml` 与 `template-module/pom.xml` 的 `<erupt.version>`（生成时自动查最新版覆盖）
    > - Spring Boot 版本：上述两个 pom 的 `<parent>`（Maven 要求 parent 版本必须写死，与 erupt 官方仓库使用的 Spring Boot 版本对齐，两处需同步改）
    > - `reference/` 各文档的实测核实基线：**erupt 2.1.1（2026-08）**，只记录在本行，reference 文档内不写版本号
-5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统中文名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
+5. 将 `src/main/resources/public/` 下 `app.js` 与 `home.html` 中的 `__APP_TITLE__` 替换为系统名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述（两个文件都要替换，建议全局搜索确认）
 6. 在 `src/main/java/app/model/` 下编写实体类
 
 **实体类必须严格遵循 [reference/annotations.md](reference/annotations.md) 的规范**，这是本 skill 的核心，编写前必读。需要完整注解字典（所有属性、枚举值、子注解定义）时读 [reference/erupt-model.md](reference/erupt-model.md)。
@@ -107,7 +107,8 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 - 编译报错时根据错误信息修复（缺 import、注解属性写错、类型不匹配等），修到编译通过为止
 - 加字段 / 加实体：改代码 → 编译校验 → 重启（`generate-ddl: true` 会自动加列、建表）
-- 改外观（标题、Logo、主题色、样式）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置）和 `app.css`（自定义样式），无需改 Java 代码，重启后刷新页面生效
+- 改外观（标题、Logo、主题色、页脚、顶栏按钮、登录/退出钩子）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置，模板已列出常用项并注释说明）；改样式（登录页背景、菜单 emoji 图标等）：编辑 `app.css`（模板内有注释示例）。两者无需改 Java 代码，重启后刷新页面生效
+- 改登录后首页：编辑 `src/main/resources/public/home.html`。模板默认渲染「系统标题 + 按目录分组的菜单快捷入口卡片」（调用 `erupt-api/menu` 动态生成，随权限变化）。该页由主框架以 iframe 同源加载，URL 自带 `_token`（调 erupt-api 时放请求头 `token`）与 `_lang`；用 `<a target="_parent" href="#/build/table/实体名">` 可跳转主框架菜单。需要仪表盘/统计卡片时直接在此页 fetch erupt-api 或自写接口即可，无需注册菜单；若首页需要作为菜单项复用或做多个自定义页面，改用 TPL（见下条）
 - 自定义整页界面（仪表盘、数据大屏、任意自定义页面）：用 TPL——HTML 放 `src/main/resources/tpl/`，在 `initMenus()` 注册 type 为 `"tpl"` 的菜单即成为全页面菜单项，零 Java 代码，**必读 [reference/erupt-tpl.md](reference/erupt-tpl.md)**
 - 改字段类型 / 删字段：H2 不会自动删旧列，若启动报错，提示用户可删除项目 `data/` 目录重置数据后重启
 - 换数据库：MySQL 等生产库只需改 `application.yml` 的 datasource 并在 pom 加对应驱动
