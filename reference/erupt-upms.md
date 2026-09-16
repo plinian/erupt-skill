@@ -42,17 +42,10 @@ erupt:
     expire-time-by-login: 100      # 登录 token 有效期（分钟）
     default-account: erupt
     default-password: erupt
-    ip2region:
-      enable: true                 # 登录/操作日志的 IP 归属地解析，false 完全跳过
-      path: ""                     # 空=用 jar 内置 ip2region v4 库；可指向外部 v4/v6 xdb 文件
-  telemetry:
-    enabled: true                  # 匿名使用统计，默认开启（见下）
 erupt-app:
   verify-code-count: 2             # 登录失败 N 次出验证码（0=始终）
   water-mark: true                 # 页面水印
 ```
-
-**匿名统计**：erupt 默认会在启动时上报一次安装画像——erupt 版本、已装模块、@Erupt 数量、JDK/OS/架构、数据库类型与大版本、Spring Boot 版本、时区，不含主机名、应用名、JDBC 连接串和任何业务数据，失败静默不影响启动，检测到 `CI` 环境变量时自动跳过。启动日志里会打一行告知。关闭方式二选一：配 `erupt.telemetry.enabled: false`，或设环境变量 `ERUPT_TELEMETRY_DISABLED=1`。对上报有顾虑的交付场景，生成项目时就直接关掉。
 
 **IP 归属地格式**：归属地字符串为 `国家|省|市|ISP|国家码`。自己解析过这个字段的代码要按此格式处理。
 
