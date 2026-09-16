@@ -62,7 +62,7 @@ public class Book extends BaseModel {
 | 属性 | 说明 | 示例 |
 |------|------|------|
 | `name` | 菜单/功能名（必填） | `name = "图书管理"` |
-| `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)` |
+| `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)`；`cellEdit = false` 关掉表格内单元格直接编辑（见下文「单元格内编辑」） |
 | `orderBy` | 默认排序（字段须在实体或基类中已声明） | `orderBy = "id desc"`；按创建时间排序须继承 `MetaModelUpdateVo` 才能用 `orderBy = "createTime desc"` |
 | `desc` | 功能描述 | `desc = "管理所有图书"` |
 | `tree` | 树形展示 | 见下文「树形结构」 |
@@ -74,7 +74,8 @@ public class Book extends BaseModel {
 | 业务语义 | Java 类型 | 写法 |
 |---------|-----------|------|
 | 短文本（名称、编号） | String | `@Edit(title = "x", notNull = true, search = @Search(operator = QueryExpression.LIKE))` |
-| 长文本（备注、简介） | String | `@Edit(title = "x", type = EditType.TEXTAREA)` |
+| 长文本（备注、简介） | String | `@Edit(title = "x", type = EditType.TEXTAREA)`；要控制行高/长度加 `textareaType = @TextareaType(minRows = 5, maxRows = 20, length = 2000)` |
+| 带 @提及 的长文本（评论、工单跟进） | String | `@Edit(title = "x", type = EditType.TEXTAREA, textareaType = @TextareaType(mentionPrefix = "@", mentions = {"张三", "李四"}))`；候选要动态取时改用 `mentionFetchHandler` |
 | 富文本（详情、内容） | String | `@Lob @Edit(title = "x", type = EditType.HTML_EDITOR)` 配 `views = @View(title = "x", type = ViewType.HTML)` |
 | 数字（数量、库存） | Integer | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
 | 金额（价格、费用） | Double / BigDecimal | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
@@ -283,6 +284,22 @@ menus.add(MetaMenu.createEruptClassMenu(SiteConfig.class, menus.get(0), 30, Menu
 - 数据来源不限于数据库：`formViewBehavior`/`formSave` 里也可以读写文件、调外部 API
 - 保存前会正常执行字段校验（notNull、正则等）；`formSave` 里抛 `xyz.erupt.annotation.exception.EruptException` 可中止保存并向用户提示
 
+## 单元格内编辑（默认开启，注意关掉不该改的字段）
+
+列表页的单元格可以双击就地改值并保存，不必打开编辑表单。默认对所有可编辑字段开启，走的是与编辑表单完全相同的校验与 DataProxy 链路，不需要额外写代码。生成实体时按下面两条决定要不要关：
+
+```java
+// 整表关闭：整行必须作为一个整体被审核修改的表（财务凭证、审批单、对账记录）
+@Erupt(name = "凭证", power = @Power(cellEdit = false))
+
+// 单字段关闭：不该出现在行内小弹窗里的字段，或被 afterFetch 改写过显示值的字段
+@EruptField(edit = @Edit(title = "密钥", type = EditType.INPUT, cellEdit = false))
+```
+
+**必须关闭的两种字段**：
+- 密钥、密码、证件号一类敏感字段——行内弹窗改值比表单更容易误操作，也更容易被旁人看到
+- 被 `DataProxy.afterFetch` 脱敏/拼接/包成 HTML 的字段——单元格编辑器的初始值取自表格当前显示的那一行，`138****0000` 会被原样写回库（行编辑表单不受影响，它按主键单独取原始记录）
+
 ## 菜单注册（必做，否则实体不会出现在后台）
 
 @Erupt 实体**不会**自动出现在菜单，必须在启动类 `Application.initMenus()` 中注册（模板已带 EruptModule 骨架，取消注释并补齐即可）：
@@ -319,3 +336,6 @@ public List<MetaMenu> initMenus() {
 10. **@Search 没有 `vague` 属性**（那是 erupt 1.x 的旧 API），模糊查询写 `@Search(operator = QueryExpression.LIKE)` 并 import `xyz.erupt.annotation.config.QueryExpression`
 11. **`QueryExpression` 只有 `EQ / GT / LT / LIKE / IN / RANGE`**，没有 `GE / LE / NE / BETWEEN`；范围查询用 `RANGE`
 12. **`orderBy`/搜索/展示引用的字段必须真实存在**：`createTime`/`updateTime` 仅 `MetaModelUpdateVo`/`HyperModelUpdateVo`（非 `BaseModel`）才有，否则查询时抛 `PathElementException`（见上文「基类选择」）
+13. **`ifExpr` / `@View(template)` 里拿到的是原始值**：CHOICE 是 `@VL` 的 value（`"1"`）、BOOLEAN 是 `true`/`false`，不是界面上的 `"上架"`/`"是"`。写 `item.status === '上架'` 永远不成立，要写 `item.status === '1'`
+14. **`notNull = true` 的多值字段提交空数组会被判为未填**：`MULTI_CHOICE`/`CHECKBOX`/`TAB_TABLE_ADD`/`MULTI_FORM`/`TAB_TREE` 这类字段，空集合等同于空值。非必填的多值字段不要加 `notNull = true`
+15. **菜单图标用 Font Awesome 7 命名**（如 `fa fa-diagram-project`、`fa fa-wand-magic-sparkles`）；FA4 旧名靠内置兼容层仍可用，但新写的代码统一用新名

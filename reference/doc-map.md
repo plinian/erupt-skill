@@ -42,10 +42,10 @@
 `annotation/erupt`、`annotation/erupt-field`、`annotation/edit`、`annotation/view`、`annotation/power`、`annotation/search`、`annotation/filter`、`annotation/tree`、`annotation/link-tree`、`annotation/drill`、`annotation/row-operation`、`annotation/on-change`、`annotation/dynamic`、`annotation/drag-sort`、`annotation/layout`、`annotation/form-steps`（分步表单）、`annotation/order-by`、`annotation/vis`（卡片/看板/甘特/日历）
 
 ### 字段类型（field-types/）
-每种 EditType 一页，总览在 `field-types/index`；具体如 `field-types/choice`、`field-types/reference-table`、`field-types/attachment`、`field-types/tab-table-add`、`field-types/button` 等。
+每种 EditType 一页，总览在 `field-types/index`；具体如 `field-types/choice`、`field-types/reference-table`、`field-types/attachment`、`field-types/tab-table-add`、`field-types/button`、`field-types/textarea`（含 @提及）、`field-types/auto-complete` 等。
 
 ### 模块用法（modules/）
-每个模块一页，总览在 `modules/index`；常用：`modules/erupt-job`、`modules/erupt-notice`、`modules/erupt-websocket`、`modules/erupt-http`、`modules/erupt-jdbc`、`modules/erupt-file`、`modules/erupt-upms`、`modules/erupt-report/index`、`modules/erupt-print`。
+每个模块一页，总览在 `modules/index`；常用：`modules/erupt-job`、`modules/erupt-notice`、`modules/erupt-websocket`、`modules/erupt-http`、`modules/erupt-jdbc`、`modules/erupt-file`、`modules/erupt-upms`、`modules/erupt-report/index`、`modules/erupt-print`、`modules/erupt-remote`（VNC/SSH 远程主机）、`modules/erupt-atlas`（模型图谱）。
 
 ### 配置 / 上手
 `guide/configuration`（全部配置项）、`guide/getting-started`、`guide/database`（换数据库）。

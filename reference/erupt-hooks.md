@@ -8,11 +8,13 @@
 |---|---|---|
 | 底部合计/统计行 | `extraRow(conditions)` | 返回 `List<Row>`，`Row.builder().columns(List.of(new Column(值, 跨列数)))` |
 | 顶部提醒条 | `alert(conditions)` | 返回 `Alert.info("...")`，null=不显示 |
-| 显示脱敏/拼接/动态列 | `afterFetch(list)` | 改 `Collection<Map>` 的值即改前端显示，不动库数据（key 为 camelCase 字段名） |
+| 显示脱敏/拼接/动态列 | `afterFetch(list)` | 改 `Collection<Map>` 的值即改前端显示，不动库数据（key 为 camelCase 字段名）；**改过的字段要配 `@Edit(cellEdit = false)`**，见下方注意 |
 | 查询前追加条件 | `beforeFetch(conditions)` | 返回 HQL 条件串；数据权限优先用 Looker 基类（见 erupt-upms.md） |
 | Excel 导入导出拦截 | `excelExport(wb)` / `excelImport(wb)` / `excelImportProcess(list)` | wb 需强转 POI `Workbook`；导入入库前校验抛 `EruptException` 中止 |
 
 `Row`/`Column`/`Alert` 均在 `xyz.erupt.annotation.model`。
+
+> **`afterFetch` 与单元格内编辑的冲突**：表格支持双击单元格就地编辑，编辑器的初始值取自表格当前显示的那一行，也就是 `afterFetch` 改写后的值。于是被脱敏成 `138****0000`、被拼接或被包成 HTML 的值会被原样写回数据库。行编辑表单不受影响（它按主键单独取一次原始记录）。所以 `afterFetch` 只改纯展示字段；若被改的字段本身可编辑，给它加 `@Edit(cellEdit = false)`，或整表关掉 `@Erupt(power = @Power(cellEdit = false))`。
 
 ## 表单联动（后端驱动，零前端代码）
 
