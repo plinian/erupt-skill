@@ -58,9 +58,16 @@
     viewDetails = true,   // 查看详情
     export = false,       // 导出 Excel
     importable = false,   // 导入 Excel
+    copy = true,          // 复制行（以选中行数据预填新增表单）
+    cellEdit = true,      // 表格内单元格直接编辑（见下）
+    ai = true,            // 是否允许 AI 工具读取/操作该模型（装了 erupt-ai 时生效）
     powerHandler = MyPowerHandler.class  // 动态权限（实现 PowerHandler）
 )
 ```
+
+**`cellEdit` 单元格内编辑**：开启后表格里可以双击单元格就地改值，不必打开编辑表单。单元格走的是与编辑表单完全相同的校验与 DataProxy 链路，因此跨字段校验规则无需另写。两个粒度：`@Power(cellEdit = false)` 关掉整张表（适合"整行必须作为一个整体被审核修改"的表，如财务凭证），`@Edit(cellEdit = false)` 只关单个字段（适合不该出现在行内小弹窗里的字段，如密钥、长文本）。
+
+> 用 `afterFetch` 改写过的字段要留意：行内编辑的初始值取自表格当前显示的那一行，被脱敏/格式化/拼装成 HTML 的值会被原样写回库。这类字段要么只读展示，要么标 `@Edit(cellEdit = false)`。
 
 ---
 
@@ -76,7 +83,7 @@
     fold = false,                                 // 是否折叠显示（按钮过多时）
     mode = RowOperation.Mode.MULTI,               // 依赖行数据模式（见下）
     type = RowOperation.Type.ERUPT,               // 按钮类型（见下）
-    ifExpr = "",                                  // JS 表达式控制显示/禁用，变量: item（当前行数据）
+    ifExpr = "",                                  // JS 表达式控制显示/禁用，变量: item（当前行数据，值为库里的原始值，见下方警告）
     ifExprBehavior = IfExprBehavior.DISABLE,      // ifExpr 结果控制 HIDE（隐藏）/ DISABLE（禁用）
     show = @ExprBool(...),                        // 动态控制按钮是否显示
     eruptClass = MyForm.class,                    // 点击弹出的表单类（void.class 表示无表单）
@@ -85,6 +92,8 @@
     tpl = @Tpl(path = "")                         // type=TPL 时使用，可用 rows 变量获取选中行
 )
 ```
+
+> **`ifExpr` / `@View(template)` 里拿到的是原始值，不是界面上看到的文案**。列表接口返回库里存的原始值：CHOICE 字段是 `@VL` 的 value（`"1"`），BOOLEAN 字段是 `true`/`false`，不是 `"上架"`、`"是"`。所以条件要写 `item.status === '1'`、`item.published !== true`，写成 `item.status === '上架'` 会永远不成立。唯一被服务端改写的是 PASSWORD 字段（固定占位符）。Excel 导出不受影响，导出时仍按 `@VL` label 与 `boolType` 文案输出。
 
 **`RowOperation.Mode` 枚举：**
 - `SINGLE` — 依赖单行数据（选中一行才可点击）
@@ -154,7 +163,7 @@
 ```java
 @Layout(
     formSize = Layout.FormSize.DEFAULT,           // DEFAULT（默认）/ FULL_LINE（整行表单）
-    formSteps = false,                            // 分步表单向导（2.1.1+，见下）
+    formSteps = false,                            // 分步表单向导（见下）
     tableLeftFixed = 0,                           // 表格左侧固定列数
     tableRightFixed = 0,                          // 表格右侧固定列数
     pagingType = Layout.PagingType.BACKEND,       // 分页方式（见下）
@@ -169,7 +178,7 @@
 
 **`PagingType` 枚举：** `BACKEND`（后端分页）/ `FRONT`（前端分页）/ `NONE`（不分页）
 
-**`formSteps` 分步表单（2.1.1+）**：表单字段很多（约 12 个以上）时开启，渲染为分步向导，顶部步骤条显示进度。分步以 `DIVIDE` 字段为边界——每个 DIVIDE 开启一个新步骤，其 `title`/`desc` 即步骤标题/描述，其后的字段归属该步骤；DIVIDE 字段加 `@Transient`。「下一步」触发当前步骤的必填校验，步骤条可自由回退、向前跳转会依次校验途经步骤：
+**`formSteps` 分步表单**：表单字段很多（约 12 个以上）时开启，渲染为分步向导，顶部步骤条显示进度。分步以 `DIVIDE` 字段为边界——每个 DIVIDE 开启一个新步骤，其 `title`/`desc` 即步骤标题/描述，其后的字段归属该步骤；DIVIDE 字段加 `@Transient`。「下一步」触发当前步骤的必填校验，步骤条可自由回退、向前跳转会依次校验途经步骤：
 
 ```java
 @Erupt(name = "入职登记", layout = @Layout(formSteps = true))
@@ -276,7 +285,7 @@ public class EmployeeEntry extends BaseModel {
     sortable = false,                     // 是否可点击列头排序
     export = true,                        // 是否包含在 Excel 导出
     className = "",                       // CSS 类名
-    template = "value + '元'",            // JS 格式化表达式，变量：value（当前值）/ item（整行）
+    template = "value + '元'",            // JS 格式化表达式，变量：value（当前值，原始值）/ item（整行）
     tpl = @Tpl(path="", enable=false),    // 单元格弹出层模板，可用 row 变量
     ifRender = @ExprBool(...)             // 动态渲染条件
 )
@@ -322,6 +331,9 @@ public class EmployeeEntry extends BaseModel {
     placeHolder = "",                             // 输入框占位提示
     type = EditType.AUTO,                         // 组件类型（见 EditType 枚举）
     readonly = @Readonly(...),                    // 只读配置
+    cellEdit = true,                              // 是否允许在表格内直接编辑该字段（@Power(cellEdit) 开启时生效）
+    ai = true,                                    // 是否在该字段上提供行内 AI 写作助手（仅文本类组件，需装 erupt-ai）
+    prompt = "",                                  // 给 AI 的字段提示词（markdown），指导 AI 助手如何填写该字段
     search = @Search(...),                        // 是否作为查询条件
     orderBy = "",                                 // 修饰关联对象时的排序 HQL
     filter = { @Filter("...") },                 // 修饰关联对象时的数据过滤
@@ -341,6 +353,7 @@ public class EmployeeEntry extends BaseModel {
     tagsType = @TagsType(...),
     attachmentType = @AttachmentType(...),
     htmlEditorType = @HtmlEditorType(...),
+    textareaType = @TextareaType(...),
     autoCompleteType = @AutoCompleteType(...),
     referenceTreeType = @ReferenceTreeType(...),
     referenceTableType = @ReferenceTableType(...),
@@ -464,6 +477,20 @@ public class EmployeeEntry extends BaseModel {
 ```java
 @InputType(length=255, type="text", fullSpan=false, regex="", autoTrim=true, prefix={}, suffix={})
 ```
+
+#### `@TextareaType`（type=TEXTAREA）
+```java
+@TextareaType(
+    length = Integer.MAX_VALUE,   // 最大输入长度
+    minRows = 3,                  // 最少可见行数
+    maxRows = 20,                 // 超过此行数出现滚动条
+    mentionPrefix = {"@"},        // 触发 @提及 的前缀字符，可多个（如 {"@", "#"}）；空数组=不启用提及
+    mentions = {"张三", "李四"},   // 静态提及候选
+    mentionFetchHandler = { MyTagsHandler.class },  // 动态提及候选（复用 TagsFetchHandler 接口）
+    mentionFetchHandlerParams = {}                  // 传给 handler 的静态参数
+)
+```
+用于评论、工单备注一类需要 @人 的长文本；不配 `mentionPrefix` 时就是一个可控制行数与长度的普通多行文本框。
 
 #### `@NumberType`（type=NUMBER）
 ```java
@@ -592,8 +619,9 @@ private Set<Integer> mid;
 
 #### `@AutoCompleteType`（type=AUTO_COMPLETE）
 ```java
-@AutoCompleteType(handler=MyAutoCompleteHandler.class, param={}, triggerLength=1)
+@AutoCompleteType(values={"北京","上海"}, handler=MyAutoCompleteHandler.class, param={}, triggerLength=1)
 ```
+`values` 为静态候选，按输入内容不区分大小写匹配；`handler` 动态生成候选，两者结果合并。`handler` 可以不写（只给 `values` 即可），也可只写 `handler` 不给 `values`。
 
 #### `@CodeEditorType`（type=CODE_EDITOR）
 ```java

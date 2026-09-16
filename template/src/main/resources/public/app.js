@@ -15,13 +15,20 @@ window.eruptSiteConfig = {
     // 页脚版权：copyright 控制显隐，copyrightTxt 自定义文案（支持 HTML）
     copyright: true,
     // copyrightTxt: "© 2026 __APP_TITLE__",
-    // 主题：primaryColor 主色调，headerColor 顶栏背景色
+    // 主题：以下都是「默认值」，用户在右上角设置抽屉里选过之后以用户选择为准
     theme: {
-        primaryColor: "#3f51b5"
-        // headerColor: "#ffffff"
+        // 主色调
+        primaryColor: "#3f51b5",
+        // 顶栏背景色
+        // headerColor: "#ffffff",
+        // 暗色模式：true / false / "auto"（跟随操作系统）
+        // dark: "auto",
+        // 紧凑模式（行高与间距更小，一屏放更多数据）
+        // compact: false,
+        // 皮肤风格："default" / "brutalist"（硬边高对比） / "liquid-glass"（玻璃拟态）
+        // skin: "default",
     },
-    // 默认夜间模式 / 深色侧栏（用户可在右上角设置抽屉中自行覆盖）
-    // darkTheme: false,
+    // 深色侧栏
     // asideDark: false,
     // 多页签模式（默认关闭，用户可在设置抽屉中开启）
     tabReuse: false,

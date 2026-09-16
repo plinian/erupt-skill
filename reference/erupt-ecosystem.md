@@ -26,6 +26,8 @@
 | erupt-notice | 多渠道消息通知（站内信/邮件等渠道扩展） | 消息、通知、提醒 |
 | erupt-print | 单据打印模板 | 打印、单据 |
 | erupt-terminal | 网页版服务器终端 | 终端、SSH |
+| erupt-remote | 后台维护远程主机，网页里直开 VNC 桌面 / SSH 终端 + SFTP 文件面板 | 远程桌面、跳板机、堡垒机、远程运维 |
+| erupt-atlas | 模型图谱：血缘、层级、影响面、体检视图 + 可搜索的 Erupt 类注册表 | 模型关系、血缘、影响分析 |
 | erupt-websocket | WebSocket 支持 | 实时推送 |
 | erupt-tpl | 模板引擎，自定义页面/弹窗（详见 erupt-tpl.md） | 自定义页面、大屏 |
 | erupt-spring-boot-starter-all | 一键全家桶：starter + 上述常用插件 + AI | — |
@@ -52,5 +54,8 @@ erupt-cloud-server（控制中心）+ erupt-cloud-node（业务节点）。
 | erupt-notice | 注入 `EruptNoticeService.send(...)` 发消息；继承 `AbstractNoticeChannel` 扩展渠道 | `modules/erupt-notice` |
 | erupt-websocket | 注入 `EruptWebSocketService`（`sendJsNotify`/`sendJsMessage`）推送前端 | `modules/erupt-websocket` |
 | erupt-http/jdbc/file | 数据源注解，见 erupt-datasource.md | `modules/erupt-http` 等 |
+| erupt-remote | 不写代码，但要配 `erupt.remote.secret-key`（凭据 AES 密钥，留空则首次启动随机生成写入 `.erupt/remote.key`，**多节点部署必须显式配同一值**）；另有 `max-sessions`（默认 20）、`idle-timeout-minutes`（默认 30）、`connect-timeout-seconds`（默认 5） | `modules/erupt-remote` |
 
-**零代码模块**（加依赖重启即出现菜单，纯界面操作）：erupt-monitor / erupt-magic-api / erupt-designer / erupt-terminal / erupt-report / erupt-print。
+**零代码模块**（加依赖重启即出现菜单，纯界面操作）：erupt-monitor / erupt-magic-api / erupt-designer / erupt-terminal / erupt-report / erupt-print / erupt-atlas。
+
+`erupt-remote` 的两点运维前提：JPA 会新建 `e_remote_host` 与 `e_remote_host_user` 两张表；Nginx 反代必须为 `/erupt-remote` 转发 WebSocket upgrade，SFTP 上传走裸 body 流式写入，需调大 `client_max_body_size`。权限是两层：菜单权限决定能不能用远程功能，主机记录上的 Authorized Users 决定能连哪台（不勾选则仅超管可见）。

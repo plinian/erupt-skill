@@ -64,8 +64,8 @@ bash <skill目录>/scripts/warmup.sh
    > **版本基线（全部版本的唯一声明点，升级只改这些位置）**：
    > - erupt 兜底版本：`template/pom.xml` 与 `template-module/pom.xml` 的 `<erupt.version>`（生成时自动查最新版覆盖）
    > - Spring Boot 版本：上述两个 pom 的 `<parent>`（Maven 要求 parent 版本必须写死，与 erupt 官方仓库使用的 Spring Boot 版本对齐，两处需同步改）
-   > - `reference/` 各文档的实测核实基线：**erupt 2.1.1（2026-08）**，只记录在本行，reference 文档内不写版本号
-5. 将 `src/main/resources/public/` 下 `app.js` 与 `home.html` 中的 `__APP_TITLE__` 替换为系统名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述（两个文件都要替换，建议全局搜索确认）
+   > - `reference/` 各文档的实测核实基线：**erupt 2.2.0（2026-09）**，只记录在本行，reference 文档内不写版本号
+5. 将 `src/main/resources/public/app.js` 中的 `__APP_TITLE__` 替换为系统名（如"图书管理系统"）、`__APP_DESC__` 替换为一句话描述
 6. 在 `src/main/java/app/model/` 下编写实体类
 
 **实体类必须严格遵循 [reference/annotations.md](reference/annotations.md) 的规范**，这是本 skill 的核心，编写前必读。需要完整注解字典（所有属性、枚举值、子注解定义）时读 [reference/erupt-model.md](reference/erupt-model.md)。
@@ -107,8 +107,12 @@ bash <skill目录>/scripts/compile.sh <项目目录>
 
 - 编译报错时根据错误信息修复（缺 import、注解属性写错、类型不匹配等），修到编译通过为止
 - 加字段 / 加实体：改代码 → 编译校验 → 重启（`generate-ddl: true` 会自动加列、建表）
-- 改外观（标题、Logo、主题色、页脚、顶栏按钮、登录/退出钩子）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置，模板已列出常用项并注释说明）；改样式（登录页背景、菜单 emoji 图标等）：编辑 `app.css`（模板内有注释示例）。两者无需改 Java 代码，重启后刷新页面生效
-- 改登录后首页：编辑 `src/main/resources/public/home.html`。模板默认渲染「系统标题 + 按目录分组的菜单快捷入口卡片」（调用 `erupt-api/menu` 动态生成，随权限变化）。该页由主框架以 iframe 同源加载，URL 自带 `_token`（调 erupt-api 时放请求头 `token`）与 `_lang`；用 `<a target="_parent" href="#/build/table/实体名">` 可跳转主框架菜单。需要仪表盘/统计卡片时直接在此页 fetch erupt-api 或自写接口即可，无需注册菜单；若首页需要作为菜单项复用或做多个自定义页面，改用 TPL（见下条）
+- 改外观（标题、Logo、主题色、暗色/紧凑/皮肤风格、页脚、顶栏按钮、登录/退出钩子）：编辑 `src/main/resources/public/app.js`（eruptSiteConfig 配置，模板已列出常用项并注释说明）；改样式（登录页背景、菜单 emoji 图标等）：编辑 `app.css`（模板内有注释示例）。两者无需改 Java 代码，重启后刷新页面生效。注意 `theme` 里配的是**默认值**，用户在右上角设置抽屉里选过之后以用户选择为准（存 localStorage）
+- 登录后首页：**默认用 erupt 自带的工作台**（问候语、统计卡片、常用与最近打开的菜单，随权限与收藏变化），模板不再放 home.html，不要主动创建。只有用户明确要求换掉首页时，才新建 `src/main/resources/public/home.html` 覆盖它
+  - 自写首页的接入方式：该页由主框架以 iframe 同源加载，URL 自带 `_token`（调 erupt-api 时放请求头 `token`）与 `_lang`；用 `<a target="_parent" href="#/build/table/实体名">` 跳转主框架菜单。需要仪表盘/统计卡片时直接 fetch `erupt-api/menu`、`erupt-api/userinfo` 或自写接口即可，无需注册菜单
+  - 自写首页要跟随暗色模式：主框架在自己的 `<html>` 上挂 `dark` 类、写 `--ant-primary-color`，同源读 `window.parent.document.documentElement` 并用 `MutationObserver` 监听 class/style 变化同步到本页
+  - 后台给某个用户配了「首页菜单」（EruptUser 的 eruptMenu 字段）时，登录后直接进那个菜单，工作台和自定义 home.html 都不会显示——用户反馈"首页没生效"先查这里
+  - 若首页需要作为菜单项复用或做多个自定义页面，改用 TPL（见下条）
 - 自定义整页界面（仪表盘、数据大屏、任意自定义页面）：用 TPL——HTML 放 `src/main/resources/tpl/`，在 `initMenus()` 注册 type 为 `"tpl"` 的菜单即成为全页面菜单项，零 Java 代码，**必读 [reference/erupt-tpl.md](reference/erupt-tpl.md)**
 - 改字段类型 / 删字段：H2 不会自动删旧列，若启动报错，提示用户可删除项目 `data/` 目录重置数据后重启
 - 换数据库：MySQL 等生产库只需改 `application.yml` 的 datasource 并在 pom 加对应驱动
