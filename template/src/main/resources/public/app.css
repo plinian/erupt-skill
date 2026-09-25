@@ -9,12 +9,8 @@
 .icon-setting:before { content: "⚙️"; }
 */
 
-/* 例 2：登录页背景图（图片放到 src/main/resources/public/assets/ 下） */
-/*
-layout-passport > .container {
-    background: #fff url(./assets/login-bg.svg) center / cover no-repeat !important;
-}
-*/
+/* 例 2：登录页背景图不要用 CSS 覆盖，改在 app.js 里配 theme.loginBackground（一张图替换所有登录布局的默认插画）；
+   登录页布局（居中 / 侧边面板 / 宽卡 / 壁纸 / 海报）同样在 app.js 的 theme.loginLayout 里选 */
 
 /* 例 3：登录页标题字体 */
 /*

@@ -1,6 +1,6 @@
 # Erupt 实体生成规范（速查）
 
-生成实体类时严格遵循本文档。本文档基于 erupt 2.0.4 编写并验证（实际生成时版本追 Maven 最新 release，用法向后兼容；若新版编译报错以错误信息为准并查官方文档），JPA 用 `jakarta.persistence.*`。
+生成实体类时严格遵循本文档。本文档已对照 erupt 发布版实测核实（基线版本统一记录在 SKILL.md「版本基线」；实际生成时版本追 Maven 最新 release，用法向后兼容，若新版编译报错以错误信息为准并查官方文档），JPA 用 `jakarta.persistence.*`。
 完整注解字典（@Erupt/@EruptField 所有属性与枚举）见 [erupt-model.md](erupt-model.md)，本文档只覆盖生成时的决策规则与项目约定。
 
 ## 实体类骨架（标准模板）
@@ -62,10 +62,11 @@ public class Book extends BaseModel {
 | 属性 | 说明 | 示例 |
 |------|------|------|
 | `name` | 菜单/功能名（必填） | `name = "图书管理"` |
-| `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)`；`cellEdit = false` 关掉表格内单元格直接编辑（见下文「单元格内编辑」） |
+| `power` | 功能开关 | `@Power(export = true, importable = true, add = true, edit = true, delete = true)`；`cellEdit = false` 关掉表格内单元格直接编辑（见下文「单元格内编辑」）；`comment = false` 关掉该模型的记录评论（仅引入 erupt-comment 时有意义，日志、流水类模型关掉） |
 | `orderBy` | 默认排序（字段须在实体或基类中已声明） | `orderBy = "id desc"`；按创建时间排序须继承 `MetaModelUpdateVo` 才能用 `orderBy = "createTime desc"` |
 | `desc` | 功能描述 | `desc = "管理所有图书"` |
-| `tree` | 树形展示 | 见下文「树形结构」 |
+| `tree` | 树形展示 | 见下文「树形结构」；业务上有层级上限（组织不超过三级）时加 `maxLevel = 3`，前端不再提供越级「添加子节点」，服务端同步拒绝 |
+| `layout` | 布局 | 长文本列、标签列、行操作按钮很多的表加 `layout = @Layout(tableTruncate = false)` 让单元格换行而不是省略号截断（数据量特别大的表保持默认） |
 
 ## 字段类型 → EditType 映射决策表
 
@@ -79,7 +80,7 @@ public class Book extends BaseModel {
 | 富文本（详情、内容） | String | `@Lob @Edit(title = "x", type = EditType.HTML_EDITOR)` 配 `views = @View(title = "x", type = ViewType.HTML)` |
 | 数字（数量、库存） | Integer | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
 | 金额（价格、费用） | Double / BigDecimal | `@Edit(title = "x", numberType = @NumberType(min = 0))` |
-| 是/否开关 | Boolean | `@Edit(title = "x", boolType = @BoolType(trueText = "是", falseText = "否"))` |
+| 是/否开关 | Boolean | `@Edit(title = "x", boolType = @BoolType(trueText = "是", falseText = "否"))`；控件默认 `AUTO`：`notNull = true` 渲染为开关、否则为可保持「未选」的单选。启用/停用这类必有值的状态位写 `notNull = true` 并给字段默认值（`= true`），或显式 `@BoolType(type = BoolType.Type.SWITCH)` |
 | 日期 | java.util.Date | `@Edit(title = "x", dateType = @DateType)` |
 | 日期时间 | java.util.Date | `@Edit(title = "x", dateType = @DateType(type = DateType.Type.DATE_TIME))` |
 | 固定选项（状态、分类） | Integer / String | `@Edit(title = "x", type = EditType.CHOICE, search = @Search, choiceType = @ChoiceType(vl = {@VL(value = "1", label = "上架"), @VL(value = "2", label = "下架")}))` |
@@ -91,11 +92,15 @@ public class Book extends BaseModel {
 | 评分 | Integer | `@Edit(title = "x", type = EditType.RATE)` |
 | 滑块/百分比 | Integer | `@Edit(title = "x", type = EditType.SLIDER, sliderType = @SliderType(max = 100))` |
 | 颜色 | String | `@Edit(title = "x", type = EditType.COLOR)` |
+| 图标（菜单/分类/状态图标） | String | `@Edit(title = "x", type = EditType.ICON)`：从 Font Awesome 全库检索选取，存 `fa fa-house` 这样的类名，表格自动渲染成图标；无专属子注解 |
+| 键值对（请求头、环境变量、扩展参数等结构不固定的配置） | Map<String, String> | `@JdbcTypeCode(SqlTypes.JSON) @Edit(title = "x", type = EditType.KEY_VALUE, keyValueType = @KeyValueType(keys = {"timeout", "retry"}, max = 20))`；也可用 `String` 字段存 JSON 文本（此时**不要**加 `@JdbcTypeCode`，否则二次编码）。不参与 Excel 导入导出 |
 | 标签 | String | `@Edit(title = "x", type = EditType.TAGS, tagsType = @TagsType)` |
 | Markdown | String | `@Lob @Edit(title = "x", type = EditType.MARKDOWN)` |
 | 代码 | String | `@Lob @Edit(title = "x", type = EditType.CODE_EDITOR, codeEditType = @CodeEditorType(language = "sql"))` |
 
 注意：`type = EditType.CHOICE` 等需要子注解的类型必须同时写子注解；带子注解属性（boolType、dateType、numberType 等）时 type 可省略（AUTO 会识别）。
+
+**多级表头**：语义上成组的相邻列（单价 / 数量 / 合计，省 / 市 / 区）给 `@View(group = "金额")` 相同的 group 值，表格合并成一个上级表头；组内只有一列或被固定的列不分组。
 
 **表单组织（字段多时主动用，提升录入体验）**：
 
@@ -154,6 +159,8 @@ private List<OrderItem> items;
 private Set<Tag> tags;
 ```
 
+选项很多（几十个以上，如角色→权限、用户→标签库）时把 `type` 换成 `EditType.TRANSFER`、子注解换成 `transferType = @TransferType(label = "name", remark = "description")`：渲染为可搜索的双列穿梭框，`remark` 列作为每项的 tooltip；JPA 映射与存储和 CHECKBOX 完全一致，两者可随时互换。值列表（非实体）的多选同理：`@MultiChoiceType(type = MultiChoiceType.Type.TRANSFER)`。
+
 ## 树形结构（分类、部门、区域等）
 
 ```java
@@ -178,7 +185,7 @@ public class Category extends BaseModel {
     private Category parent;
 }
 ```
-需要 import `xyz.erupt.annotation.sub_erupt.Tree`。
+需要 import `xyz.erupt.annotation.sub_erupt.Tree`。层级有业务上限时加 `maxLevel`（根为第 1 级，`maxLevel = 3` 即最深三级，默认 0 不限）。
 
 ## 左树右表（@LinkTree，业务表带树形维度时优先用）
 
@@ -339,3 +346,5 @@ public List<MetaMenu> initMenus() {
 13. **`ifExpr` / `@View(template)` 里拿到的是原始值**：CHOICE 是 `@VL` 的 value（`"1"`）、BOOLEAN 是 `true`/`false`，不是界面上的 `"上架"`/`"是"`。写 `item.status === '上架'` 永远不成立，要写 `item.status === '1'`
 14. **`notNull = true` 的多值字段提交空数组会被判为未填**：`MULTI_CHOICE`/`CHECKBOX`/`TAB_TABLE_ADD`/`MULTI_FORM`/`TAB_TREE` 这类字段，空集合等同于空值。非必填的多值字段不要加 `notNull = true`
 15. **菜单图标用 Font Awesome 7 命名**（如 `fa fa-diagram-project`、`fa fa-wand-magic-sparkles`）；FA4 旧名靠内置兼容层仍可用，但新写的代码统一用新名
+16. **`KEY_VALUE` 用 `String` 存 JSON 文本时不要加 `@JdbcTypeCode(SqlTypes.JSON)`**，否则 Hibernate 会把 JSON 文本再编码一次；推荐直接用 `Map<String, String>` + JSON 列
+17. **BOOLEAN 字段 `notNull = true` 会渲染成开关**，未选择按 `false` 提交；需要保留「未填」语义（如问卷里的是否同意）就不要加 `notNull`，或显式 `@BoolType(type = BoolType.Type.RADIO)`
