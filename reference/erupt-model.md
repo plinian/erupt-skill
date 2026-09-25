@@ -61,6 +61,7 @@
     copy = true,          // 复制行（以选中行数据预填新增表单）
     cellEdit = true,      // 表格内单元格直接编辑（见下）
     ai = true,            // 是否允许 AI 工具读取/操作该模型（装了 erupt-ai 时生效）
+    comment = true,       // 记录是否携带评论流（装了 erupt-comment 时生效；日志类模型设 false）
     powerHandler = MyPowerHandler.class  // 动态权限（实现 PowerHandler）
 )
 ```
@@ -139,6 +140,7 @@
     label = "name",      // 树节点展示列
     pid = "parentId",    // 父级节点标识列（不配置则不启用树）
     expandLevel = 999,   // 默认展开层级数
+    maxLevel = 0,        // 最大层级（根为第 1 级），0 不限；到达上限的节点不再提供「添加子节点」，服务端拒绝任何让节点更深的保存（含拖动、导入、API）
     rootPid = @Expr(...) // 根节点 pid 特征（默认 null 为根）
 )
 ```
@@ -172,6 +174,7 @@
     refreshTime = -1,                             // 自动刷新间隔（毫秒，-1 不刷新）
     tableWidth = "",                              // 表格宽度
     tableOperatorWidth = "",                      // 操作列宽度
+    tableTruncate = true,                         // true 超出列宽省略号截断；false 单元格换行显示（长文本、多标签、多按钮一次看全，但不再启用虚拟滚动）
     collapseActionButton = false                  // 行内查看/修改/删除折叠为下拉菜单（2.0.0+）
 )
 ```
@@ -280,6 +283,7 @@ public class EmployeeEntry extends BaseModel {
     desc = "",                            // 描述
     column = "",                          // 修饰对象类型时指定列路径，如 "dept.name"
     type = ViewType.AUTO,                 // 显示类型（见 ViewType 枚举）
+    group = "",                           // 表头分组：相邻且 group 相同的列合并到同一上级表头（多级表头）；固定列与组内孤立列不分组
     width = "",                           // 列宽，如 "120px" / "10%"
     show = true,                          // 是否显示
     sortable = false,                     // 是否可点击列头排序
@@ -299,7 +303,10 @@ public class EmployeeEntry extends BaseModel {
 | `TEXT` | 普通文本 |
 | `SAFE_TEXT` | 安全文本（HTML 转义渲染） |
 | `COLOR` | 颜色色块 |
+| `ICON` | 按 Font Awesome 类名渲染图标（EditType.ICON 字段 AUTO 即得） |
+| `KEY_VALUE` | JSON 对象逐对渲染为 `键: 值` 标签（EditType.KEY_VALUE 字段 AUTO 即得） |
 | `IMAGE` | 图片 |
+| `AVATAR` | 圆形头像缩略图，空值显示人形剪影 |
 | `IMAGE_BASE64` | Base64 图片 |
 | `HTML` | HTML 渲染 |
 | `MOBILE_HTML` | 手机端方式展示 |
@@ -311,12 +318,14 @@ public class EmployeeEntry extends BaseModel {
 | `ATTACHMENT_DIALOG` | 对话框展示附件 |
 | `DATE` | 日期 |
 | `DATE_TIME` | 日期时间 |
-| `BOOLEAN` | 开关 |
+| `BOOLEAN` | 开关（表格中空值不显示） |
 | `NUMBER` | 数值 |
+| `PROGRESS` | 进度条（编辑类型为 SLIDER 时最大值取 `SliderType.max`，否则 100） |
 | `MAP` | 地图 |
 | `CODE` | 代码 |
 | `TAB_VIEW` | 展示一对多/多对多数据 |
 | `MARKDOWN` | Markdown |
+| `PASSWORD` | 密码掩码（存储值替换为占位符，不下发客户端） |
 
 ---
 
@@ -347,6 +356,8 @@ public class EmployeeEntry extends BaseModel {
     sliderType = @SliderType(...),
     rateType = @RateType(...),
     dateType = @DateType(...),
+    colorType = @ColorType(...),
+    keyValueType = @KeyValueType(...),
     boolType = @BoolType(...),
     choiceType = @ChoiceType(...),
     multiChoiceType = @MultiChoiceType(...),
@@ -358,6 +369,7 @@ public class EmployeeEntry extends BaseModel {
     referenceTreeType = @ReferenceTreeType(...),
     referenceTableType = @ReferenceTableType(...),
     checkboxType = @CheckboxType(...),
+    transferType = @TransferType(...),
     codeEditType = @CodeEditorType(language="java"),
     groupType = @GroupType(...),
     calloutType = @CalloutType(...),
@@ -376,6 +388,8 @@ public class EmployeeEntry extends BaseModel {
 | `NUMBER` | 数字输入框 | 数字 |
 | `SLIDER` | 数字滑块 | 数字 |
 | `COLOR` | 颜色选择器 | String |
+| `ICON` | 图标选择器（Font Awesome 全库检索，存类名如 `fa fa-house`） | String |
+| `KEY_VALUE` | 键值对编辑器（JSON 对象） | Map<String, String>（JSON 列）/ String |
 | `RATE` | 评分 | 数字 |
 | `DATE` | 日期选择器 | String、Date |
 | `BOOLEAN` | 布尔开关 | boolean |
@@ -400,6 +414,7 @@ public class EmployeeEntry extends BaseModel {
 | `REFERENCE_TREE` | 树引用（多对一） | 对象 |
 | `REFERENCE_TABLE` | 表格引用（多对一） | 对象 |
 | `CHECKBOX` | 多选（多对多） | 对象集合 |
+| `TRANSFER` | 可搜索双列穿梭框（多对多，选项多时替代 CHECKBOX，存储与接口完全相同） | 对象集合 |
 | `TAB_TREE` | 多选树（多对多） | 对象集合 |
 | `TAB_TABLE_REFER` | 多选表格（多对多） | 对象集合 |
 | `TAB_TABLE_ADD` | 表格添加（一对多） | 对象集合 |
@@ -414,6 +429,10 @@ public class EmployeeEntry extends BaseModel {
 - `BUTTON`：`buttonType = @ButtonType(handler = XxxHandler.class, icon = "fa fa-bolt", confirm = "确认执行？")`，handler 实现 `EruptButtonHandler<实体>` 的 `click(entity, params)`（入参为当前表单全量数据，返回值为前端要执行的 JS 表达式如 `"msg.success('OK')"`，null 表示不执行）；另有 `populateForm`（回填表单值）、`buildEditExpr`（动态改其他字段注解配置）两个可选钩子。适合连通性测试、配置校验类场景；字段加 `@Transient`
 - `MULTI_FORM`：用法与 TAB_TABLE_ADD 完全一致（@OneToMany + cascade），仅展现形态不同——每行子记录渲染为内联表单块而非表格行；同样不要在子表实体用 Lombok `@Data`
 - `COMBINE` 存 JSON：Hibernate 6（Spring Boot 3）下去掉 @OneToOne/@JoinColumn，字段加 `@JdbcTypeCode(SqlTypes.JSON)`，关联对象整体序列化存主表单字段，子对象无需 @Entity；适合无需关联查询的扩展信息
+- `ICON`：无专属子注解，`@Edit(title = "图标", type = EditType.ICON)` 即可；面板按名称 / 标签 / 别名搜索，可按 solid / regular / brands 过滤；值可附加颜色类（`fa fa-house icon-red`、`icon-primary` 跟随主题色）；可作搜索条件；`@View` AUTO 自动按 `ViewType.ICON` 渲染，要显示原始类名显式 `type = ViewType.TEXT`
+- `KEY_VALUE`：字段两种写法——`Map<String, String>` + `@JdbcTypeCode(SqlTypes.JSON)`（推荐）或 `String` 存 JSON 文本（此时**不加** `@JdbcTypeCode`）；保存时丢弃键为空的行，重复键会标记提示；不参与 Excel 导入导出
+- `TRANSFER`：与 CHECKBOX 共用选项结构与 `/checkbox/{field}` 接口，把已有 CHECKBOX 字段改成 TRANSFER 只需换 `type` 与子注解，不影响存储与权限；`remark` 指定的列作为每项 tooltip
+- `BOOLEAN` 控件由 `@BoolType(type)` 决定：`AUTO`（默认）在 `notNull = true` 时渲染开关、否则单选；`SWITCH` 未选按 `false` 提交（新建与历史 `null` 均填 `false`）；`RADIO` 保留「未选择」状态。表格中的空 BOOLEAN 不再显示空标签
 
 ---
 
@@ -517,7 +536,26 @@ public class EmployeeEntry extends BaseModel {
 
 #### `@BoolType`（type=BOOLEAN）
 ```java
-@BoolType(trueText="是", falseText="否")
+@BoolType(
+    trueText = "是",
+    falseText = "否",
+    type = BoolType.Type.AUTO   // AUTO（notNull 开关 / 否则单选）/ RADIO（单选，可保持未选）/ SWITCH（开关，未选按 false 提交）
+)
+```
+
+#### `@ColorType`（type=COLOR）
+```java
+@ColorType(alpha=false, presets={"#F5222D", "#1890FF"}, showText=true)   // 透明通道 / 预设色板 / 色块旁显示色值
+```
+
+#### `@KeyValueType`（type=KEY_VALUE）
+```java
+@KeyValueType(
+    keyPlaceholder = "",          // 键列占位文本，空用内置多语言文案
+    valuePlaceholder = "",        // 值列占位文本
+    max = 0,                      // 最大键值对数，0 不限
+    keys = {"Content-Type", "Authorization"}   // 输入键时的固定候选
+)
 ```
 
 #### `@ChoiceType`（type=CHOICE）
@@ -582,7 +620,7 @@ private Set<Integer> mid;
 `@MultiChoiceType` 参数：
 ```java
 @MultiChoiceType(
-    type = MultiChoiceType.Type.CHECKBOX,  // SELECT（下拉多选）/ CHECKBOX（复选框）
+    type = MultiChoiceType.Type.CHECKBOX,  // SELECT（下拉多选）/ CHECKBOX（复选框）/ TRANSFER（可搜索穿梭框，选项很多时用）
     vl = { @VL(...) },
     fetchHandler = { MyHandler.class },
     fetchHandlerParams = {},
@@ -646,6 +684,11 @@ private Set<Integer> mid;
 #### `@CheckboxType`（type=CHECKBOX，多对多）
 ```java
 @CheckboxType(id="id", label="name", remark="")
+```
+
+#### `@TransferType`（type=TRANSFER，多对多）
+```java
+@TransferType(id="id", label="name", remark="")   // 与 CheckboxType 同构；remark 列显示为每项的 tooltip
 ```
 
 ---
